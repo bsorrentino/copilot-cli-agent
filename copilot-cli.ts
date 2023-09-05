@@ -1,6 +1,7 @@
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import 'dotenv/config'
 import { DynamicTool } from "langchain/tools";
+import { Client as Hub } from 'langchainhub'
 
 // [Emulated multi-function calls within one request](https://community.openai.com/t/emulated-multi-function-calls-within-one-request/269582)
 const main = async () => {
@@ -84,6 +85,17 @@ const main = async () => {
     console.log(result.additional_kwargs.function_call);
     console.log(result.lc_kwargs.content);
 
+
+
 }
 
+const langchainHubMain = async () => {
+    const hub = new Hub()
+
+    const repos = await hub.listRepos()
+
+    console.log( repos )
+}
+
+// langchainHubMain()
 main();
