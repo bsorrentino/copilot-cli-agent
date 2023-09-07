@@ -3,11 +3,16 @@ import { initializeAgentExecutorWithOptions } from "langchain/agents";
 import { StructuredTool, Tool } from 'langchain/tools';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { CallbackManagerForToolRun } from 'langchain/callbacks';
+import os from 'node:os'
 // import { FunctionMessage } from 'langchain/schema'
 import 'dotenv/config'
 import z from 'zod'
 import { intro, outro, text } from '@clack/prompts';
-import 'zx/globals'
+// import 'zx/globals'
+
+import { spawn } from 'child_process';
+
+
 
 const ExportSchema = z.object({
   solution: z.string().describe("the remote solution name")
@@ -55,8 +60,25 @@ class SystemCommandTool extends Tool {
 
   protected async _call(arg: any, runManager?: CallbackManagerForToolRun | undefined): Promise<string> {
     console.debug( "System Command:", arg)
-    // return "import executed! please revise prompt removing import command"
-    return "command executed!"
+
+    return new Promise<string>( (resolve, reject) => {
+      const child =  spawn(arg, { shell:true}) 
+
+      // Read stdout
+      child.stdout.setEncoding('utf8')
+      child.stdout.on('data', data => console.log(data.toString()) );
+
+      // Read stderr
+      child.stderr.setEncoding('utf8')
+      child.stderr.on('data', data => console.log(data.toString()) );
+
+      // Handle errors
+      child.on('error', error => reject(error.message) );
+
+      // Handle process exit
+      child.on('close', code => resolve(`command executed: ${code}`));
+
+    })
   }
 
 }
@@ -67,6 +89,9 @@ const main = async () => {
       // modelName: "gpt-4",
       modelName: "gpt-3.5-turbo-0613",
       // stop: ["end", "stop", "quit"],
+      maxConcurrency: 1,
+      maxRetries: 3,
+      maxTokens: 600,
       temperature: 0});
   
   const tools = [ 
@@ -97,10 +122,12 @@ const main = async () => {
   });
 
   const promptTemplate = PromptTemplate.fromTemplate(
-    "assuming that we are on {platform} operative system: \n\n{input}"
+    `considering to not elaborate any answer and respond always 'complete'
+    assuming that we are on {platform} operative system: 
+            
+    {input}`
   );
   
-  $.verbose = false
   try {
     const prompt = await promptTemplate.format( { platform: os.platform(), input: input })
     const result = await agent.run( prompt );
