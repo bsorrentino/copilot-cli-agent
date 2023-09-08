@@ -5,6 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "build": "tsc",
+    "start": "node dist/copilot-cli-agent.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
