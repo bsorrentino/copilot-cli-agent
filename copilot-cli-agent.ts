@@ -9,50 +9,64 @@ import 'dotenv/config'
 import z from 'zod'
 import { intro, outro, text } from '@clack/prompts';
 // import 'zx/globals'
+import { promisify} from 'node:util'
+import { spawn } from 'node:child_process';
+import { readdir, stat } from 'node:fs'
+import path from 'node:path'
 
-import { spawn } from 'child_process';
+import { fileURLToPath } from 'url';
 
+const __filename = fileURLToPath(import.meta.url);
 
+const __dirname = path.dirname(__filename);
 
-const ExportSchema = z.object({
-  solution: z.string().describe("the remote solution name")
-});
-class ExportSolutionTool extends StructuredTool<typeof ExportSchema> {
+const readdirAsync = promisify(readdir);
+const statAsync = promisify(stat);
 
-  name = "export_solution"
-  description = "export dataverse solution from remote environment to local file system"
-  schema = ExportSchema
+const scanFolderAndImportPackage = async (folderPath: string) => {
+    // Ensure the path is absolute
+    if (!path.isAbsolute(folderPath)) {
+      folderPath = path.join(__dirname, folderPath);
+  }
+
+  console.debug( 'scan folder', folderPath )
+
+  // Check if directory exists
+  const stats = await statAsync(folderPath);
+  if (!stats.isDirectory()) {
+      throw new Error('Provided path either does not exist or is not a directory.');
+  }
+
+  // Read directory
+  const files = await readdirAsync(folderPath);
+
+  // Filter only .js files and dynamically require them
+  const modules = files
+      .filter(file => path.extname(file) === '.js')
+      .map(file => import(path.join(folderPath, file)));
   
-  async _call(arg: z.output<typeof ExportSchema>, runManager?: CallbackManagerForToolRun): Promise<string> {
-    console.debug( "Export Solution:", arg.solution)
-    // return "export executed! please revise prompt removing import command"
-    return "export executed!"
-
-  }
+  return Promise.all(modules);
 }
 
-const ImportSchema = z.object({
-  path:         z.string()
-                  .describe("the solution path"),
-  environment:  z.string()
-                  .describe("the target environment"),
-  type:         z.enum( ["managed", "unmanaged", "both"] )
-                  .describe( "the solution type" )
-                  .optional()
-                  .default("managed"),
-})
-class ImportSolutionTool extends StructuredTool<typeof ImportSchema> {
+export const runCommand = async ( cmd: string ) => 
+  new Promise<number|null>( (resolve, reject) => {
+    const child =  spawn(cmd, { shell:true}) 
 
-  name = "import_solution"
-  description = "import a dataverse solution to remote environment"
-  schema = ImportSchema
+    // Read stdout
+    child.stdout.setEncoding('utf8')
+    child.stdout.on('data', data => console.log(data.toString()) );
 
-  async _call(arg: z.output<typeof ImportSchema>, runManager?: CallbackManagerForToolRun): Promise<string> {
-    console.debug( "Import Solution:", arg)
-    // return "import executed! please revise prompt removing import command"
-    return "import executed!"
-  }
-}
+    // Read stderr
+    child.stderr.setEncoding('utf8')
+    child.stderr.on('data', data => console.log(data.toString()) );
+
+    // Handle errors
+    child.on('error', error => reject(error.message) );
+
+    // Handle process exit
+    child.on('close', code => resolve(code) );
+
+  })
 
 class SystemCommandTool extends Tool {
   name ="system_cmd"
@@ -61,26 +75,10 @@ class SystemCommandTool extends Tool {
   protected async _call(arg: any, runManager?: CallbackManagerForToolRun | undefined): Promise<string> {
     console.debug( "System Command:", arg)
 
-    return new Promise<string>( (resolve, reject) => {
-      const child =  spawn(arg, { shell:true}) 
+    const code =  await runCommand( arg )
 
-      // Read stdout
-      child.stdout.setEncoding('utf8')
-      child.stdout.on('data', data => console.log(data.toString()) );
-
-      // Read stderr
-      child.stderr.setEncoding('utf8')
-      child.stderr.on('data', data => console.log(data.toString()) );
-
-      // Handle errors
-      child.on('error', error => reject(error.message) );
-
-      // Handle process exit
-      child.on('close', code => resolve(`command executed: ${code}`));
-
-    })
+    return `command executed: ${code ?? ''}`
   }
-
 }
 
 const main = async () => {
@@ -94,10 +92,15 @@ const main = async () => {
       maxTokens: 600,
       temperature: 0});
   
-  const tools = [ 
-    new SystemCommandTool(),
-    new ExportSolutionTool(), 
-    new ImportSolutionTool(), 
+    const modules = await scanFolderAndImportPackage( 'commands');
+
+    const loadedTools = modules
+                        .map( m => m?.default )
+                        .filter( m => m && m.name && m.description && m.schema )
+    
+    const tools = [ 
+      new SystemCommandTool(),
+      ...loadedTools
      ];
   
   const agent = await initializeAgentExecutorWithOptions(tools, model, {
