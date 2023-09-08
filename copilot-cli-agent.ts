@@ -48,9 +48,14 @@ const scanFolderAndImportPackage = async (folderPath: string) => {
   return Promise.all(modules);
 }
 
+
+export const expandTilde = (filePath:string) => 
+  ( filePath && filePath[0] === '~') ?
+    path.join(os.homedir(), filePath.slice(1)) : filePath
+  
 export const runCommand = async ( cmd: string ) => 
   new Promise<number|null>( (resolve, reject) => {
-    const child =  spawn(cmd, { shell:true}) 
+    const child =  spawn(cmd, { shell:true }) 
 
     // Read stdout
     child.stdout.setEncoding('utf8')
