@@ -7,12 +7,13 @@ import os from 'node:os'
 // import { FunctionMessage } from 'langchain/schema'
 import 'dotenv/config'
 import z from 'zod'
-import { intro, outro, text } from '@clack/prompts';
+import { intro, outro, text, cancel, isCancel, spinner } from '@clack/prompts';
 // import 'zx/globals'
 import { promisify} from 'node:util'
 import { spawn } from 'node:child_process';
 import { readdir, stat } from 'node:fs'
 import path from 'node:path'
+import pc from 'picocolors'
 
 import { fileURLToPath } from 'url';
 
@@ -55,6 +56,9 @@ export const expandTilde = (filePath:string) =>
   
 export const runCommand = async ( cmd: string ) => 
   new Promise<number|null>( (resolve, reject) => {
+    const s = spinner();
+    s.start("Executing")
+
     const child =  spawn(cmd, { shell:true }) 
 
     // Read stdout
@@ -66,18 +70,26 @@ export const runCommand = async ( cmd: string ) =>
     child.stderr.on('data', data => console.log(data.toString()) );
 
     // Handle errors
-    child.on('error', error => reject(error.message) );
+    child.on('error', error => {
+      s.stop()
+      reject(error.message) 
+    })
 
     // Handle process exit
-    child.on('close', code => resolve(code) );
+    child.on('close', code => { 
+      s.stop()
+      resolve(code) 
+    });
 
   })
+
 
 class SystemCommandTool extends Tool {
   name ="system_cmd"
   description = "all system commands"
 
   protected async _call(arg: any, runManager?: CallbackManagerForToolRun | undefined): Promise<string> {
+
     console.debug( "System Command:", arg)
 
     const code =  await runCommand( arg )
@@ -118,7 +130,7 @@ const main = async () => {
       }
   });
 
-  intro(`let begin our conversation`);
+  intro( pc.green(`let begin our conversation`));
   
   const input = await text({
     message: 'Which commands would you like me to execute? ',
@@ -128,6 +140,11 @@ const main = async () => {
       
     },
   });
+
+  if( isCancel(input) ) {
+    // return cancel( p.italic('goodbye! 👋'))
+    return outro(pc.italic(pc.yellow('goodbye! 👋')))
+  }
 
   const promptTemplate = PromptTemplate.fromTemplate(
     `considering to not elaborate any answer and respond always 'complete'

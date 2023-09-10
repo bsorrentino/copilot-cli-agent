@@ -51,7 +51,7 @@ export class UnpackSolutionTool extends StructuredTool<typeof UnpackSchema> {
       // await runCommand`pac solution unpack --zipfile ${file} --folder ${solution} --packagetype ${ptype} --allowDelete`
       const code = await runCommand(`pac solution unpack --zipfile "${expandTilde(file)}" --folder "${expandTilde(solution)}" --allowDelete`)
       
-      return `unpack executed! ${code}`
+      return `unpack executed! ${solution}`
   
     }
   }
