@@ -1,6 +1,6 @@
 {
   "name": "langchain-copilot-cli",
-  "version": "1.0-build1",
+  "version": "1.0-build2",
   "description": "",
   "main": "index.js",
   "type": "module",
