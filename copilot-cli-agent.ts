@@ -147,9 +147,9 @@ const main = async () => {
   }
 
   const promptTemplate = PromptTemplate.fromTemplate(
-    `considering to not elaborate any answer and respond always 'complete'
-    assuming that we are on {platform} operative system: 
-            
+    `You are my command line executor assistant. 
+    Limit your response to the word 'completed' and assume that we are on {platform} operative system:
+
     {input}`
   );
   
