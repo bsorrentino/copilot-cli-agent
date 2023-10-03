@@ -130,22 +130,6 @@ const main = async () => {
       }
   });
 
-  intro( pc.green(`let begin our conversation`));
-  
-  const input = await text({
-    message: 'Which commands would you like me to execute? ',
-    placeholder: '',
-    initialValue: '',
-    validate(value) {
-      
-    },
-  });
-
-  if( isCancel(input) ) {
-    // return cancel( p.italic('goodbye! 👋'))
-    return outro(pc.italic(pc.yellow('goodbye! 👋')))
-  }
-
   const promptTemplate = PromptTemplate.fromTemplate(
     `You are my command line executor assistant. 
     Limit your response to the word 'completed' and assume that we are on {platform} operative system:
@@ -153,16 +137,39 @@ const main = async () => {
     {input}`
   );
   
-  try {
-    const prompt = await promptTemplate.format( { platform: os.platform(), input: input })
-    const result = await agent.run( prompt );
-    console.log(result);
+  intro( pc.green(`let begin our conversation`));
+  
+  do {
+
+    const input = await text({
+      message: 'Which commands would you like me to execute? ',
+      placeholder: '',
+      initialValue: '',
+      validate(value) {
+        
+      },
+    });
+  
+    if( isCancel(input) ) {
+      // return cancel( p.italic('goodbye! 👋'))
+      return outro(pc.italic(pc.yellow('goodbye! 👋')))
+      //process.exit(0)
+    }
+  
+    try {
+      const prompt = await promptTemplate.format( { platform: os.platform(), input: input })
+      const result = await agent.run( prompt );
+      console.log(result);
+    
+    }
+    catch( e:any ) {
+      console.error( e )
+    }
   
   }
-  catch( e:any ) {
-    console.error( e )
-  }
+  while( true );
 
 }
+
 
 main();
