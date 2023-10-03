@@ -81,7 +81,14 @@ const getImportSolutionPath = async ( solutionPath:string, packageType:string ):
   throw `Unknow package type ${packageType}`
 }
 
-
+/**
+ * Schema for the pack solution tool arguments.
+ * 
+ * @typedef {Object} PackSchema
+ *
+ * @property {string} solution - The local path to the solution folder. 
+ * @property {('managed'|'unmanaged'|'both')} [type='managed'] - The solution type to pack.
+ */
 const PackSchema = z.object({
     solution: z.string().describe("the local solution path"),
     type:     z.enum( ["managed", "unmanaged", "both"] )
@@ -90,6 +97,14 @@ const PackSchema = z.object({
     .default("managed"),
 
   });
+/**
+ * Tool to pack a Dataverse solution into a ZIP file.
+ *
+ * @extends {StructuredTool<PackSchema>}
+ * 
+ * Sample prompts:
+ *  - pack solution solution_export from WORKSPACES in Home folder  as unmanaged
+ */  
 export class PackSolutionTool extends StructuredTool<typeof PackSchema> {
   
     name = "pack_solution"
