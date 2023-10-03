@@ -14,8 +14,8 @@ import { runCommand, expandTilde } from '../copilot-cli-agent.js'
  * @property {string} folder - The path to unpack the contents to.
  */
 const UnpackSchema = z.object({
-  file: z.string().describe("the solution file name"),
-  folder: z.string().describe("the target solution folder name"), 
+  file: z.string().describe("the solution complete file path"),
+  folder: z.string().describe("the target solution folder name").optional(), 
 });
 
 /**
@@ -44,8 +44,9 @@ export class UnpackSolutionTool extends StructuredTool<typeof UnpackSchema> {
     async _call(arg: z.output<typeof UnpackSchema>, runManager?: CallbackManagerForToolRun): Promise<string> {
       console.debug( "Unpack Solution:", arg)
 
-      const { file, folder } = arg
+      const { file, folder = path.dirname(arg.file) } = arg
 
+      
       const solution = path.join( folder, path.basename(file, '.zip').replace( /_(\d+)_(\d+)_(\d+)(_\d+)?$/, '' ))
    
       // await runCommand`pac solution unpack --zipfile ${file} --folder ${solution} --packagetype ${ptype} --allowDelete`
