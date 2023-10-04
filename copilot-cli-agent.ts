@@ -55,19 +55,27 @@ export const expandTilde = (filePath:string) =>
     path.join(os.homedir(), filePath.slice(1)) : filePath
   
 export const runCommand = async ( cmd: string ) => 
-  new Promise<number|null>( (resolve, reject) => {
+  new Promise<string>( (resolve, reject) => {
     const s = spinner();
     s.start("Executing")
 
     const child =  spawn(cmd, { shell:true }) 
 
+    let result = ""
+
     // Read stdout
     child.stdout.setEncoding('utf8')
-    child.stdout.on('data', data => console.log(data.toString()) );
+    child.stdout.on('data', data => {
+      result = data.toString()
+      console.log(pc.green(result)) 
+    });
 
     // Read stderr
     child.stderr.setEncoding('utf8')
-    child.stderr.on('data', data => console.log(data.toString()) );
+    child.stderr.on('data', data => {
+      result = data.toString()
+      console.log(pc.red(result)) ;
+    })
 
     // Handle errors
     child.on('error', error => {
@@ -78,7 +86,7 @@ export const runCommand = async ( cmd: string ) =>
     // Handle process exit
     child.on('close', code => { 
       s.stop()
-      resolve(code) 
+      resolve(result) 
     });
 
   })
@@ -92,9 +100,9 @@ class SystemCommandTool extends Tool {
 
     console.debug( "System Command:", arg)
 
-    const code =  await runCommand( arg )
+    const result = await runCommand( arg )
 
-    return `command executed: ${code ?? ''}`
+    return `command executed: ${result}`
   }
 }
 
