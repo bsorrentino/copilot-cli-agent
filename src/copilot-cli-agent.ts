@@ -9,9 +9,8 @@ import 'dotenv/config'
 import z from 'zod'
 import { intro, outro, text, cancel, isCancel, spinner } from '@clack/prompts';
 // import 'zx/globals'
-import { promisify} from 'node:util'
 import { spawn } from 'node:child_process';
-import { readdir, stat } from 'node:fs'
+import { readdir, stat, readFile } from 'node:fs/promises'
 import path from 'node:path'
 import pc from 'picocolors'
 
@@ -21,8 +20,6 @@ const __filename = fileURLToPath(import.meta.url);
 
 const __dirname = path.dirname(__filename);
 
-const readdirAsync = promisify(readdir);
-const statAsync = promisify(stat);
 
 const scanFolderAndImportPackage = async (folderPath: string) => {
     // Ensure the path is absolute
@@ -33,13 +30,13 @@ const scanFolderAndImportPackage = async (folderPath: string) => {
   console.debug( 'scan folder', folderPath )
 
   // Check if directory exists
-  const stats = await statAsync(folderPath);
+  const stats = await stat(folderPath);
   if (!stats.isDirectory()) {
       throw new Error('Provided path either does not exist or is not a directory.');
   }
 
   // Read directory
-  const files = await readdirAsync(folderPath);
+  const files = await readdir(folderPath);
 
   // Filter only .js files and dynamically require them
   const modules = files
@@ -145,7 +142,12 @@ const main = async () => {
     {input}`
   );
   
-  intro( pc.green(`let begin our conversation`));
+  //
+  // [patorjk's ASCII Art Generator](http://patorjk.com/software/taag/#p=testall&f=PsY2&t=AI%20powered%20CLI%0A)
+  //
+  const banner = await readFile( path.join( __dirname, 'banner.txt'), 'utf8'); 
+
+  intro( pc.green(banner));
   
   do {
 
