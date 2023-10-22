@@ -9,9 +9,8 @@ import 'dotenv/config'
 import z from 'zod'
 import { intro, outro, text, cancel, isCancel, spinner } from '@clack/prompts';
 // import 'zx/globals'
-import { promisify} from 'node:util'
 import { spawn } from 'node:child_process';
-import { readdir, stat } from 'node:fs'
+import { readdir, stat, readFile } from 'node:fs/promises'
 import path from 'node:path'
 import pc from 'picocolors'
 
@@ -21,8 +20,6 @@ const __filename = fileURLToPath(import.meta.url);
 
 const __dirname = path.dirname(__filename);
 
-const readdirAsync = promisify(readdir);
-const statAsync = promisify(stat);
 
 const scanFolderAndImportPackage = async (folderPath: string) => {
     // Ensure the path is absolute
@@ -33,13 +30,13 @@ const scanFolderAndImportPackage = async (folderPath: string) => {
   console.debug( 'scan folder', folderPath )
 
   // Check if directory exists
-  const stats = await statAsync(folderPath);
+  const stats = await stat(folderPath);
   if (!stats.isDirectory()) {
       throw new Error('Provided path either does not exist or is not a directory.');
   }
 
   // Read directory
-  const files = await readdirAsync(folderPath);
+  const files = await readdir(folderPath);
 
   // Filter only .js files and dynamically require them
   const modules = files
@@ -55,19 +52,27 @@ export const expandTilde = (filePath:string) =>
     path.join(os.homedir(), filePath.slice(1)) : filePath
   
 export const runCommand = async ( cmd: string ) => 
-  new Promise<number|null>( (resolve, reject) => {
+  new Promise<string>( (resolve, reject) => {
     const s = spinner();
     s.start("Executing")
 
     const child =  spawn(cmd, { shell:true }) 
 
+    let result = ""
+
     // Read stdout
     child.stdout.setEncoding('utf8')
-    child.stdout.on('data', data => console.log(data.toString()) );
+    child.stdout.on('data', data => {
+      result = data.toString()
+      console.log(pc.green(result)) 
+    });
 
     // Read stderr
     child.stderr.setEncoding('utf8')
-    child.stderr.on('data', data => console.log(data.toString()) );
+    child.stderr.on('data', data => {
+      result = data.toString()
+      console.log(pc.red(result)) ;
+    })
 
     // Handle errors
     child.on('error', error => {
@@ -78,7 +83,7 @@ export const runCommand = async ( cmd: string ) =>
     // Handle process exit
     child.on('close', code => { 
       s.stop()
-      resolve(code) 
+      resolve(result) 
     });
 
   })
@@ -92,9 +97,9 @@ class SystemCommandTool extends Tool {
 
     console.debug( "System Command:", arg)
 
-    const code =  await runCommand( arg )
+    const result = await runCommand( arg )
 
-    return `command executed: ${code ?? ''}`
+    return `command executed: ${result}`
   }
 }
 
@@ -137,7 +142,12 @@ const main = async () => {
     {input}`
   );
   
-  intro( pc.green(`let begin our conversation`));
+  //
+  // [patorjk's ASCII Art Generator](http://patorjk.com/software/taag/#p=testall&f=PsY2&t=AI%20powered%20CLI%0A)
+  //
+  const banner = await readFile( path.join( __dirname, 'banner.txt'), 'utf8'); 
+
+  intro( pc.green(banner));
   
   do {
 
