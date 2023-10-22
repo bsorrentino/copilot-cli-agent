@@ -21,6 +21,11 @@ The [LangSmith] platform, part of the [LangChain] suite, allows for debugging, t
 ## Conclusion
 Experience the magic of integrating AI into your CLI. With LLM models like GPT 3.5/4, you have a powerful command-line assistant. This article is just the beginning. In Part 2, we'll delve deeper into adding custom command line commands using natural language requests.
 
+## Articles:
+
+* Enhance your CLI with AI [(Part 1)](https://dev.to/bsorrentino/enhance-your-cli-with-ai-part-1-1ca)
+[(Part 2)](https://dev.to/bsorrentino/enhance-your-cli-with-ai-part-1-16p0)
+
 ## References
 
 * [ReACT prompint][ReACT]
