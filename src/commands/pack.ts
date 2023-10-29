@@ -1,11 +1,9 @@
 import { CallbackManagerForToolRun } from "langchain/callbacks";
-import { StructuredTool } from "langchain/tools";
 import { z } from "zod";
 import path from 'node:path'
 import fs from 'node:fs/promises'
-import { runCommand, expandTilde } from '../copilot-cli-agent.js'
 import pc from 'picocolors'
-import { spinner } from "@clack/prompts";
+import { CommandTool, ExecutionContext, expandTilde, runCommand } from "../copilot-cli-agent.js";
 
 
 /**
@@ -105,11 +103,15 @@ const PackSchema = z.object({
  * Sample prompts:
  *  - pack solution solution_export from WORKSPACES in Home folder  as unmanaged
  */  
-export class PackSolutionTool extends StructuredTool<typeof PackSchema> {
+export class PackSolutionTool extends CommandTool<typeof PackSchema> {
   
     name = "pack_solution"
     description = "pack dataverse solution folder to a zip file"
     schema = PackSchema
+
+    constructor( execContext?: ExecutionContext ) {
+      super(execContext)
+    }
 
     async _call(arg: z.output<typeof PackSchema>, runManager?: CallbackManagerForToolRun): Promise<string> {
       console.debug( "Pack Solution:", arg)
@@ -121,7 +123,7 @@ export class PackSolutionTool extends StructuredTool<typeof PackSchema> {
 
         const command = `pac solution pack --zipfile ${importSolutionPath} -f ${solution} -p ${type} -aw`
 
-        await runCommand( command )
+        await runCommand( command, this.execContext )
   
         return `pack executed! ${importSolutionPath}`
   
@@ -136,4 +138,6 @@ export class PackSolutionTool extends StructuredTool<typeof PackSchema> {
     }
   }
 
-export default new PackSolutionTool()
+const createTool = ( execContext?: ExecutionContext  ) => new PackSolutionTool( execContext )
+
+export default createTool
