@@ -2,7 +2,7 @@ import { CallbackManagerForToolRun } from "langchain/callbacks";
 import { z } from "zod";
 import path from 'node:path'
 
-import { CommandTool, ExecutionContext, expandTilde, runCommand } from "../copilot-cli-agent.js";
+import { CommandTool, ExecutionContext, expandTilde, runCommand } from "../copilot-cli-agent";
 
 /** 
  * Schema for the unpack tool arguments.

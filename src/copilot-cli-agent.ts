@@ -2,15 +2,39 @@ import path from 'node:path'
 import os from 'node:os'
 import { spawn } from 'node:child_process';
 import { readdir, stat, readFile } from 'node:fs/promises'
-import { fileURLToPath } from 'url';
-import { PromptTemplate } from 'langchain';
 import { StructuredTool, Tool } from 'langchain/tools';
 import { z } from 'zod';
 import { AgentExecutor, initializeAgentExecutorWithOptions } from "langchain/agents";
 import { ChatOpenAI } from 'langchain/chat_models/openai';
-
 import { CallbackManagerForToolRun } from 'langchain/callbacks';
+import { PromptTemplate } from 'langchain/prompts';
 
+export interface Progress { 
+  start( message: string ):void;
+  stop():void;
+}
+
+type Color = 'black' |'red' | 'green' | 'yellow' | 'blue' |'magenta' | 'cyan' | 'white';
+
+export type LogOptions = { fg: Color }
+
+/**
+ * Interface for execution context passed to command tools. 
+ * Provides logging and progress tracking capabilities.
+*/
+export interface ExecutionContext  {
+
+  progress( ): Progress;
+
+  log( message: string, options?: Partial<LogOptions> ): void;
+}
+
+/**
+ * Abstract base class for command tools. Extends StructuredTool and adds an optional ExecutionContext property.
+ * 
+ * Command tools represent CLI commands that can be executed. They define a schema for their inputs and implement the 
+ * _call method to handle execution. The ExecutionContext allows them to access logging and other context services.
+*/
 export abstract class CommandTool<T extends z.ZodObject<any, any, any, any>> extends StructuredTool<T> {
   
   protected execContext?: ExecutionContext;
@@ -21,37 +45,29 @@ export abstract class CommandTool<T extends z.ZodObject<any, any, any, any>> ext
   }
 }
 
-export interface Progress { 
-  start( message: string ):void;
-  stop():void;
-}
+/**
+ * Loads and returns the contents of the banner.txt file.
+ * 
+ * This function is used to display a banner when the CLI starts up.
+ * It loads the banner text from the provided banner.txt file.
+ * 
+ * @param dirname - The directory containing the banner.txt file.
+ * @returns A promise resolving to the banner text string.
+ * @link [patorjk's ASCII Art Generator](http://patorjk.com/software/taag/#p=testall&f=PsY2&t=AI%20powered%20CLI%0A)
+ */
+export const banner = async (dirname: string) => await readFile(path.join(dirname, 'banner.txt'), 'utf8');
 
-type Color = 'black' |'red' | 'green' | 'yellow' | 'blue' |'magenta' | 'cyan' | 'white';
-
-type LogOptions = { fg: Color }
-
-export interface ExecutionContext {
-
-  progress( ): Progress;
-
-  log( message: string, options?: Partial<LogOptions> ): void;
-}
-
-export const __filename = fileURLToPath(import.meta.url);
-
-export const __dirname = path.dirname(__filename);
-//
-// [patorjk's ASCII Art Generator](http://patorjk.com/software/taag/#p=testall&f=PsY2&t=AI%20powered%20CLI%0A)
-//
-export const banner = await readFile( path.join( __dirname, 'banner.txt'), 'utf8'); 
-
+/**
+ * Recursively scans the provided folder path and dynamically imports all JavaScript modules found.
+ * 
+ * @param folderPath - The absolute path of the folder to scan.
+ * @returns A Promise resolving to an array of all imported modules.
+ */
 export const scanFolderAndImportPackage = async (folderPath: string) => {
-    // Ensure the path is absolute
-    if (!path.isAbsolute(folderPath)) {
-      folderPath = path.join(__dirname, folderPath);
-  }
-
-  console.debug( 'scan folder', folderPath )
+  // Ensure the path is absolute
+  // if (!path.isAbsolute(folderPath)) {
+  //   folderPath = path.join(__dirname, folderPath);
+  // }
 
   // Check if directory exists
   const stats = await stat(folderPath);
@@ -71,29 +87,26 @@ export const scanFolderAndImportPackage = async (folderPath: string) => {
 }
 
 /**
- * [expandTilde description]
- *
- * @param   {string}  filePath  [filePath description]
- *
- * @return  {[type]}            [return description]
+ * Expands the tilde (~) character in a file path to the user's home directory.
+ * 
+ * @param filePath - The file path to expand.
+ * @returns The expanded file path with the tilde replaced by the home directory.
  */
-export const expandTilde = (filePath:string ) => 
+export const expandTilde = (filePath: string) =>
   ( filePath && filePath[0] === '~') ?
     path.join(os.homedir(), filePath.slice(1)) : filePath
   
 /**
- * [runCommand description]
- *
- * @param   {string}            cmd  [cmd description]
- * @param   {ExecutionContext}  ctx  [ctx description]
- *
- * @return  {[type]}                 [return description]
- */    
-export const runCommand = async ( cmd: string, ctx?: ExecutionContext ) => 
-  new Promise<string>( (resolve, reject) => {
-    const s = ctx?.progress();
-    s?.start("Executing")
-
+ * Runs a shell command and returns the output.
+ * 
+ * @param cmd - The command to run.
+ * @param ctx - Optional execution context for logging output. 
+ * @returns Promise resolving to the command output string.
+ */
+export const runCommand = async (cmd: string, ctx?: ExecutionContext) => {
+  
+  return new Promise<string>( (resolve, reject) => {
+    
     const child =  spawn(cmd, { shell:true }) 
 
     let result = ""
@@ -114,18 +127,16 @@ export const runCommand = async ( cmd: string, ctx?: ExecutionContext ) =>
 
     // Handle errors
     child.on('error', error => {
-      s?.stop()
       reject(error.message) 
     })
 
     // Handle process exit
     child.on('close', code => { 
-      s?.stop()
       resolve(result) 
     });
 
   })
-
+}
   class SystemCommandTool extends Tool {
     name ="system_cmd"
     description = "all system commands"
@@ -139,17 +150,23 @@ export const runCommand = async ( cmd: string, ctx?: ExecutionContext ) =>
 
     protected async _call(arg: any, runManager?: CallbackManagerForToolRun | undefined): Promise<string> {
   
-      console.debug( "System Command:", arg)
-  
+      // console.debug( "System Command:", arg)
+      const progress =  this.execContext?.progress()
+
+      progress?.start( `Running command: ${arg}` )
+      
       const result = await runCommand( arg, this.execContext )
-  
+
+      progress?.stop()
+      
+
       return `command executed: ${result}`
     }
   }
 
   export class CopilotCliAgentExecutor {
 
-    public static async create(execContext?: ExecutionContext): Promise<CopilotCliAgentExecutor> {
+    public static async create( commandModules: any[], execContext?: ExecutionContext): Promise<CopilotCliAgentExecutor> {
   
       const model = new ChatOpenAI({
         // modelName: "gpt-4",
@@ -161,9 +178,7 @@ export const runCommand = async ( cmd: string, ctx?: ExecutionContext ) =>
         temperature: 0
       });
   
-      const modules = await scanFolderAndImportPackage('commands');
-  
-      const loadedTools = modules
+      const loadedTools = commandModules
         .filter(m => typeof (m?.default.createTool) === 'function')
         .map(m => m?.default.createTool(execContext))
         .filter(m => m && m.name && m.description && m.schema)

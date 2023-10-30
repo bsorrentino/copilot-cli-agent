@@ -3,7 +3,7 @@ import { z } from "zod";
 import path from 'node:path'
 import fs from 'node:fs/promises'
 import pc from 'picocolors'
-import { CommandTool, ExecutionContext, expandTilde, runCommand } from "../copilot-cli-agent.js";
+import { CommandTool, ExecutionContext, expandTilde, runCommand } from "../copilot-cli-agent";
 
 
 /**

@@ -1,7 +1,6 @@
 import { CallbackManagerForToolRun } from "langchain/callbacks";
-import { StructuredTool } from "langchain/tools";
 import { z } from "zod";
-import { CommandTool, ExecutionContext } from "../copilot-cli-agent.js";
+import { CommandTool, ExecutionContext } from "../copilot-cli-agent";
 
 
 const ImportSchema = z.object({

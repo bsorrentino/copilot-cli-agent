@@ -1,9 +1,20 @@
-import * as blessed from 'blessed'
+/// <reference path="../types/blessed-fix.d.ts" />
 
+import 'dotenv/config'
+import * as blessed from 'blessed'
+import path from 'node:path'
+import { 
+  CopilotCliAgentExecutor, 
+  ExecutionContext, 
+  LogOptions, 
+  Progress, 
+  banner, 
+  scanFolderAndImportPackage 
+} from './copilot-cli-agent';
+import EventEmitter from 'node:events';
 
 const toInt = ( v: number | string ): number  => 
     ( typeof v ==='string' ) ? parseInt( v ) : v ;
-
 
 const screen = blessed.screen({
   smartCSR: true,
@@ -141,33 +152,62 @@ const loader = blessed.loading({
   hidden: true
 });
 
-const submitAction = () => promptForm.submit();
-submit.on('press', submitAction );
-submit.on('click', submitAction );
+class ExecutionContextImpl implements ExecutionContext {
 
-const cancelAction = () => promptForm.reset()
-cancel.on('press', cancelAction )
-cancel.on('click', cancelAction );
+  progress(): Progress {
 
-promptForm.on('submit', data => {
-  logger.log( "submitted: {bold}%s{/bold} - lastSubmit:  - %s", 
-            data, promptForm.submission, Date.now().toString() );
+    return { 
+      start: (msg) => {},
+      stop: () => {}
+    }
+  }
 
-  loader.load('processing...');
-  setTimeout(() => loader.stop(), 3000);
+  log( message: string, options?: Partial<LogOptions> ): void {
+    logger.log(message) 
+  }
+  
+}
 
-});
 
-promptForm.on('reset', data => {
-  logger.log( "reset - data: %s", data );
+const main = async () => {
+
+  const execContext = new ExecutionContextImpl();
+
+  const _modules = await scanFolderAndImportPackage( path.join( __dirname, 'commands') );
+    
+  const executor = await CopilotCliAgentExecutor.create( _modules, execContext );
+  
+
+  const submitAction = () => promptForm.submit();
+  submit.on('press', submitAction );
+  submit.on('click', submitAction );
+  
+  const cancelAction = () => promptForm.reset()
+  cancel.on('press', cancelAction )
+  cancel.on('click', cancelAction );
+  
+  promptForm.on('submit', data => {
+    // logger.log( "submitted: {bold}%s{/bold} - lastSubmit:  - %s", 
+    //           data, promptForm.submission, Date.now().toString() );
+  
+    loader.load("running...")
+    executor.run( data.prompt_text )
+      .finally( () => loader.stop() );
+  
+  });
+  
+  promptForm.on('reset', data => {
+    logger.log( "reset - data: %s", data );
+    promptText.focus();
+    screen.render();
+  });
+  
+  screen.key('q', () => process.exit(0) );
+  
   promptText.focus();
+  
   screen.render();
-});
+  
+}
 
-screen.key('q', () => process.exit(0) );
-
-promptText.focus();
-
-logger.log( "prompt height: %s %s", promptBox.iheight, promptBox.height  );
-
-screen.render();
+main();

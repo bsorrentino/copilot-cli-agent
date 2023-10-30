@@ -1,10 +1,14 @@
 import 'dotenv/config'
-
+import { fileURLToPath } from 'url';
+import path from 'node:path'
 import pc from 'picocolors'
 import { intro, outro, text, isCancel, spinner } from '@clack/prompts';
 
-import { CopilotCliAgentExecutor, ExecutionContext, Progress, banner } from './copilot-cli-agent.js';
+import { CopilotCliAgentExecutor, ExecutionContext, Progress, banner, scanFolderAndImportPackage } from './copilot-cli-agent.js';
 
+const __filename = fileURLToPath(import.meta.url);
+
+const __dirname = path.dirname(__filename);
 
 const execContext:ExecutionContext = {
 
@@ -17,9 +21,13 @@ const execContext:ExecutionContext = {
 
 const main = async () => {
 
-  const executor = await CopilotCliAgentExecutor.create( execContext );
+  const _modules = await scanFolderAndImportPackage( path.join( __dirname, 'commands') );
+  
+  const executor = await CopilotCliAgentExecutor.create( _modules, execContext );
 
-  intro( pc.green(banner));
+  const _banner = await banner(__dirname);
+
+  intro( pc.green(_banner));
   
   do {
 
