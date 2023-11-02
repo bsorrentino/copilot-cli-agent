@@ -1,0 +1,37 @@
+{
+  "name": "simple-cli",
+  "version": "0.0.1",
+  "description": "simple copilot ai implementation",
+  "keywords": [
+    "ai",
+    "copilot"
+  ],
+  "author": "bsorrentino <bartolomeo.sorrentino@gmail.com> (http://soulsoftware-bsc.blogspot.it/)",
+  "homepage": "https://github.com/bsorrentino/copilot-cli-agent#readme",
+  "license": "MIT",
+  "main": "lib/simple-cli.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bsorrentino/copilot-cli-agent.git"
+  },
+  "scripts": {
+    "test": "node ./__tests__/simple.test.js"
+  },
+  "bugs": {
+    "url": "https://github.com/bsorrentino/copilot-cli-agent/issues"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.7.0",
+    "picocolors": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.10"
+  }
+}
