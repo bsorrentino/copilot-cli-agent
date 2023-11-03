@@ -55,7 +55,8 @@ export abstract class CommandTool<T extends z.ZodObject<any, any, any, any>> ext
  * @returns A promise resolving to the banner text string.
  * @link [patorjk's ASCII Art Generator](http://patorjk.com/software/taag/#p=testall&f=PsY2&t=AI%20powered%20CLI%0A)
  */
-export const banner = async (dirname: string) => await readFile(path.join(dirname, 'banner.txt'), 'utf8');
+export const banner = async (dirname?: string) => 
+  await readFile(path.join( dirname ?? '', 'banner.txt'), 'utf8');
 
 /**
  * Recursively scans the provided folder path and dynamically imports all JavaScript modules found.
@@ -80,7 +81,7 @@ export const scanFolderAndImportPackage = async (folderPath: string) => {
 
   // Filter only .js files and dynamically require them
   const modules = files
-      .filter(file => path.extname(file) === '.js')
+      .filter(file => path.extname(file) === '.mjs')
       .map(file => import(path.join(folderPath, file)));
   
   return Promise.all(modules);
