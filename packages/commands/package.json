@@ -1,0 +1,30 @@
+{
+  "name": "cli-commands",
+  "version": "0.0.1",
+  "description": "cli command extensions",
+  "private": true,
+  "type": "module",
+  "keywords": [
+    "cli",
+    "copilot",
+    "ai",
+    "command"
+  ],
+  "author": "bsorrentino <bartolomeo.sorrentino@gmail.com> (http://soulsoftware-bsc.blogspot.it/)",
+  "homepage": "https://github.com/bsorrentino/copilot-cli-agent#readme",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bsorrentino/copilot-cli-agent.git"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "bugs": {
+    "url": "https://github.com/bsorrentino/copilot-cli-agent/issues"
+  },
+  "dependencies": {
+    "copilot-cli-core": "*",
+    "langchain": "^0.0.178"
+  }
+}

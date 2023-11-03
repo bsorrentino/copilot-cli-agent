@@ -1,9 +1,8 @@
 import { CallbackManagerForToolRun } from "langchain/callbacks";
-import { StructuredTool } from "langchain/tools";
 import { z } from "zod";
 import path from 'node:path'
 
-import { runCommand, expandTilde } from '../copilot-cli-agent.js'
+import { CommandTool, ExecutionContext, expandTilde, runCommand } from "copilot-cli-core";
 
 /** 
  * Schema for the unpack tool arguments.
@@ -27,12 +26,16 @@ const UnpackSchema = z.object({
  * 
  * @extends {StructuredTool}
  */  
-export class UnpackSolutionTool extends StructuredTool<typeof UnpackSchema> {
+export class UnpackSolutionTool extends CommandTool<typeof UnpackSchema> {
   
     name = "unpack_solution"
     description = "unpack dataverse solution zip file to a folder"
     schema = UnpackSchema
     
+    constructor( execContext?: ExecutionContext ) {
+      super(execContext)
+    }
+
     /**
      * Unpacks dataverse solution ZIP file.
      *
@@ -50,11 +53,13 @@ export class UnpackSolutionTool extends StructuredTool<typeof UnpackSchema> {
       const solution = path.join( folder, path.basename(file, '.zip').replace( /_(\d+)_(\d+)_(\d+)(_\d+)?$/, '' ))
    
       // await runCommand`pac solution unpack --zipfile ${file} --folder ${solution} --packagetype ${ptype} --allowDelete`
-      const code = await runCommand(`pac solution unpack --zipfile "${expandTilde(file)}" --folder "${expandTilde(solution)}" --allowDelete`)
+      const code = await runCommand(`pac solution unpack --zipfile "${expandTilde(file)}" --folder "${expandTilde(solution)}" --allowDelete`, this.execContext)
       
       return `unpack executed! ${solution}`
   
     }
   }
 
-export default new UnpackSolutionTool()
+const createTool = (execContext?: ExecutionContext) => new UnpackSolutionTool(execContext)
+
+export default createTool
