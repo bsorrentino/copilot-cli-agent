@@ -1,15 +1,11 @@
-/// <reference path="../types/terminal-kit.d.ts" />
+//// <reference path="../types/terminal-kit.d.ts" />
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const terminal_kit_1 = __importDefault(require("terminal-kit"));
-const term = terminal_kit_1.default.terminal;
+import termkit from 'terminal-kit';
+const term = termkit.terminal;
 const document = term.createDocument();
 term.clear();
 // term.hideCursor() ;
-const layout = new terminal_kit_1.default.Layout({
+const layout = new termkit.Layout({
     parent: document,
     boxChars: 'lightRounded',
     layout: {
@@ -29,7 +25,7 @@ const layout = new terminal_kit_1.default.Layout({
             {
                 id: 'r1',
                 // heightPercent: 20,
-                height: 7,
+                height: 8,
                 columns: [
                     { id: 'prompt' },
                 ]
@@ -37,8 +33,7 @@ const layout = new terminal_kit_1.default.Layout({
             {
                 id: 'r2',
                 columns: [
-                    // { id: 'fixed2' , width: 20 } ,
-                    { id: 'auto2' },
+                    { id: 'content' },
                 ]
             }
         ]
@@ -71,7 +66,7 @@ const layout = new terminal_kit_1.default.Layout({
 // 	content: 'Fixed size box (2)' ,
 // 	attr: { color: 'magenta' , bold: true }
 // } ) ;
-new terminal_kit_1.default.Text({
+new termkit.Text({
     parent: document.elements.title,
     content: "AI Prompt",
     attr: {
@@ -80,7 +75,7 @@ new terminal_kit_1.default.Text({
         italic: true
     }
 });
-const prompt = new terminal_kit_1.default.LabeledInput({
+const prompt = new termkit.LabeledInput({
     parent: document.elements.prompt,
     label: 'prompt: ',
     // x: 5 ,
@@ -93,21 +88,36 @@ const prompt = new terminal_kit_1.default.LabeledInput({
     vScrollBar: false,
     hScrollBar: false,
 });
-prompt.on('submit', onSubmit);
-// submit.on( 'submit' , () => { onSubmit( labeledInput.getValue() ) } ) ;
-function log(msg, y = 22) {
+const submit = new termkit.Button({
+    parent: document.elements.prompt,
+    content: '> SUBMIT',
+    focusAttr: { bgColor: '@light-gray' },
+    contentHasMarkup: true,
+    value: 'submitButton',
+    x: prompt.outputWidth - 8,
+    y: 5,
+});
+const output = new termkit.TextBox({
+    parent: document.elements.content,
+    scrollable: true,
+    vScrollBar: true,
+    width: term.width - 2,
+    height: document.elements.content.outputHeight,
+});
+function log(msg, y = term.height) {
+    if (y > term.height) {
+        y = term.height;
+    }
     term.saveCursor();
     term.moveTo.styleReset.eraseLine(1, y, msg);
     term.restoreCursor();
 }
 function onSubmit(value) {
-    //console.error( 'Submitted: ' , value ) ;
-    term.saveCursor();
-    log(`Submitted: ${value}`);
-    term.restoreCursor();
+    output.appendLog(`Submitted: ${value}\n`);
 }
 log(`term.width: ${term.width}`);
-document.focusNext();
+// document.focusNext();
+document.giveFocusTo(prompt);
 term.on('key', (key) => {
     switch (key) {
         case 'CTRL_C':
@@ -118,21 +128,17 @@ term.on('key', (key) => {
             process.exit();
         default:
             term.saveCursor();
-            log(`key: ${key}`, 23);
+            log(`key: ${key}`, term.height - 1);
             term.restoreCursor();
     }
 });
-prompt.on('parentResize', () => {
+submit.on('submit', (v) => onSubmit(prompt.getValue()));
+submit.on('parentResize', (coords) => submit.outputX = coords.width - 8);
+prompt.on('submit', onSubmit);
+prompt.on('parentResize', (arg) => {
     // fix: pass autowidth to input component
     // fix must be applied in "LabeledInput.prototype.initTextInput"
     prompt.input.autoWidth = 1;
     // fix: propagate resize event to input component
     prompt.input.onParentResize();
-});
-term.on('resize', (w, h) => {
-    log(`resize w: ${w} - h: ${h} - outputDst: ${prompt.input.outputDst.width}`);
-    // prompt.input.setSizeAndPosition( {
-    // 	outputWidth: term.width - 2 ,
-    // } ) ;
-    // prompt.input.draw() ;
 });

@@ -2,6 +2,7 @@
   "name": "termkit-cli",
   "version": "0.0.1",
   "description": "terminal-kit copilot cli implementation ",
+  "type": "module",
   "keywords": [
     "ai",
     "copilot",
@@ -35,6 +36,7 @@
     "@types/terminal-kit": "^2.5.3"
   },
   "dependencies": {
-    "terminal-kit": "^3.0.1"
+    "terminal-kit": "^3.0.1",
+    "copilot-cli-core": "*"
   }
 }

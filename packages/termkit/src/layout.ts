@@ -1,7 +1,7 @@
-/// <reference path="../types/terminal-kit.d.ts" />
+//// <reference path="../types/terminal-kit.d.ts" />
 "use strict" ;
 
-import termkit, { TerminalEx } from 'terminal-kit' ;
+import termkit, { CoordsOptions, TerminalEx } from 'terminal-kit' ;
 
 const term = termkit.terminal as TerminalEx ;
 
@@ -30,7 +30,7 @@ const layout = new termkit.Layout( {
 			{
 				id: 'r1' ,
 				// heightPercent: 20,
-				height: 7,
+				height: 8,
 				columns: [
 					{ id: 'prompt' } ,
 				]
@@ -38,8 +38,7 @@ const layout = new termkit.Layout( {
 			{
 				id: 'r2' ,
 				columns: [
-					// { id: 'fixed2' , width: 20 } ,
-					{ id: 'auto2' } ,
+					{ id: 'content' } ,
 				]
 			}
 		]
@@ -105,11 +104,27 @@ const prompt = new termkit.LabeledInput( {
 	
 } ) ;
 
-prompt.on( 'submit' , onSubmit ) ;
-// submit.on( 'submit' , () => { onSubmit( labeledInput.getValue() ) } ) ;
+const submit = new termkit.Button( {
+	parent: document.elements.prompt ,	
+	content: '> SUBMIT' ,
+	focusAttr: { bgColor: '@light-gray' } ,
+	contentHasMarkup: true ,
+	value: 'submitButton' ,
+	x: prompt.outputWidth - 8 ,
+	y: 5 ,
+} ) ;
 
+const output = new termkit.TextBox({
+	parent: document.elements.content,	
+	scrollable: true,
+	vScrollBar: true,
+	width: term.width - 2,
+	height: document.elements.content.outputHeight,
+});
 
-function log( msg:string, y = 22 ) {
+function log( msg:string, y = term.height ) {
+	if( y > term.height ) { y = term.height ; }
+
 	term.saveCursor() ;
 	term.moveTo.styleReset.eraseLine( 1 , y , msg ) ;
 	term.restoreCursor() ;
@@ -117,14 +132,12 @@ function log( msg:string, y = 22 ) {
 
 function onSubmit( value: string )
 {
-	//console.error( 'Submitted: ' , value ) ;
-	term.saveCursor() ;
-	log( `Submitted: ${value}` ) ;
-	term.restoreCursor() ;
+	output.appendLog( `Submitted: ${value}\n` ) ;
 }
 
 log( `term.width: ${term.width}` ) ;
-document.focusNext();
+// document.focusNext();
+document.giveFocusTo( prompt ) ;
 
 term.on( 'key' ,  (key:string) => {
     
@@ -138,25 +151,27 @@ term.on( 'key' ,  (key:string) => {
 			process.exit() ;
         default: 
             term.saveCursor() ;
-			log( `key: ${key}`, 23 ) ;
+			log( `key: ${key}`, term.height - 1 ) ;
             term.restoreCursor() ;
 	}
 } ) ;
 
-prompt.on( 'parentResize' , () =>  {
+submit.on( 'submit' , ( v ) => onSubmit( prompt.getValue() ) ) ;
+submit.on( 'parentResize' , (coords:CoordsOptions) => 
+	submit.outputX = coords.width - 8 
+);
+
+prompt.on( 'submit' , onSubmit ) ;
+prompt.on( 'parentResize' , (arg:CoordsOptions) =>  {
 	// fix: pass autowidth to input component
 	// fix must be applied in "LabeledInput.prototype.initTextInput"
 	prompt.input.autoWidth =  1
 	// fix: propagate resize event to input component
 	prompt.input.onParentResize()
+	
 }) ;
 
-term.on( 'resize' , ( w:number, h:number ) => {
-	log( `resize w: ${w} - h: ${h} - outputDst: ${prompt.input.outputDst.width}` ) ;
-
-	// prompt.input.setSizeAndPosition( {
-	// 	outputWidth: term.width - 2 ,
-	// } ) ;
-	// prompt.input.draw() ;
-})
+// term.on( 'resize' , ( w:number, h:number ) => {
+// 	log( `resize w: ${w} - h: ${h} - outputDst: ${prompt.input.outputDst.width}` ) ;
+// })
 //term.moveTo( 1 , term.height ) ;

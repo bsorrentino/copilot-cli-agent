@@ -3,6 +3,10 @@ import { Terminal } from 'terminal-kit';
 
 declare module 'terminal-kit' {
 
+    interface GlobalEventHandlersEventMap {
+        parentResize: "parentResize"
+    }
+
     class Document {
         elements:Record<string,Element>
         constructor(options?: any);
@@ -10,7 +14,7 @@ declare module 'terminal-kit' {
         assignId(element: any, id: any): void;
         unassignId(element: any, id: any): void;
         giveFocusTo(element: any, type?: string): any;
-        giveFocusTo_(element: any, type: any): any;
+        // giveFocusTo_(element: any, type: any): any;
         focusNext(): void;
         focusPrevious(): void;
         bubblingEvent(element: any, key: any, altKeys: any, data: any): void;
@@ -21,6 +25,7 @@ declare module 'terminal-kit' {
         clearDocumentClipboard(value: any, key?: string): void;
         createShortcuts(element: any, ...keys: any[]): void;
         removeElementShortcuts(element: any): void;
+
         mouseClick(data: any, clickType?: string): void;
         mouseMotion(data: any, exclude?: null): void;
         mouseMotionStart(data: any): void;
@@ -34,7 +39,23 @@ declare module 'terminal-kit' {
     type TerminalEx = Terminal & { createDocument: () => Document };
     
     class Element extends NextGenEvents {
+        autoHeight: number;
+        autoWidth: number;
+
+        outputDst:number;
+        outputX:number;
+        outputY:number;
+        outputWidth:number;
+        outputHeight:number;
+
+        inputDst:number;
+	    inputX:number;
+	    inputY:number;
+	    inputWidth:number;
+	    inputHeight:number;
+
         constructor(options?: Partial<ElementOptions>);
+
         destroy(isSubDestroy?: boolean, noDraw?: boolean): void;
         debugId(): string;
         show(noDraw?: boolean): this;
@@ -72,8 +93,15 @@ declare module 'terminal-kit' {
         getKeyBinding(key: any): any;
         getKeyBindings(key: any): {};
         getActionBinding(action: any, ui?: boolean): any[];
-        getValue(): any;
+        getValue(): unknown;
         // setValue(): undefined;
+        on( eventName: "parentResize", 
+            fn?:( coords:CoordsOptions ) => void,
+            options?: NextGenEvents.AddListenerOptions): this;   
+        on( eventName: "submit", 
+            fn?:( value:string ) => void,
+            options?: NextGenEvents.AddListenerOptions): this;    
+     
     }
 
     class Layout extends Element {
@@ -89,6 +117,67 @@ declare module 'terminal-kit' {
         drawRow(computed: any, tees: any, last: any): void;
     }
 
+    class Slider extends Element {
+
+        constructor(options: any);
+
+        // onClick: () => void;
+        // onDrag: () => void;
+        // onWheel: () => void;
+        // onButtonSubmit: () => void;
+
+        isVertical: boolean;
+        slideRate: number;
+        handleOffset: number;
+        rateToValue: any;
+        valueToRate: any;
+
+        buttonBlurAttr: Attr;
+        buttonFocusAttr: Attr;
+        buttonSubmittedAttr: Attr;
+        handleAttr: Attr;
+        barAttr: Attr;
+
+        backwardSymbol: any;
+        forwardSymbol: any;
+        handleSymbol: any;
+        barSymbol: any;
+        backwardButton: Button | null;
+        forwardButton: Button | null;
+        needInput: boolean;
+        outerDrag: boolean;
+        keyBindings: {
+            UP: string;
+            DOWN: string;
+            LEFT: string;
+            RIGHT: string;
+            PAGE_UP: string;
+            PAGE_DOWN: string;
+            ' ': string;
+            HOME: string;
+            END: string;
+        };
+        buttonKeyBindings: {
+            ENTER: string;
+            KP_ENTER: string;
+        };
+        private initChildren(): void;
+        private preDrawSelf(): void;
+        private preDrawSelfVertical(): void;
+        private preDrawSelfHorizontal(): void;
+        private postDrawSelf(): void;
+
+        setSizeAndPosition(options: any): void;
+        computeHandleOffset(): void;
+        setHandleOffset(offset: any, internalAndNoDraw?: boolean): void;
+        setSlideRate(rate: any, internalAndNoDraw?: boolean): void;
+        getValue(): unknown;
+        setValue(value: unknown, internalAndNoDraw: any): void;
+        getHandleOffset(): number;
+        getSlideRate(): number;
+    
+    }
+
     class Text extends Element {
         constructor(options: Partial<TextOptions>);
         computeRequiredWidth(): any;
@@ -97,7 +186,79 @@ declare module 'terminal-kit' {
         postDrawSelf(): this | undefined;
     }
 
-    class Button extends Element {
+    class TextBox extends Element {
+        // onClick: any;
+        // onDrag: any;
+        // onWheel: any;
+        // keyBindings: any;
+
+        textAttr: Attr;
+        altTextAttr: Attr;
+        voidAttr: Attr;
+
+        scrollable: boolean;
+        hasVScrollBar: boolean;
+        hasHScrollBar: boolean;
+        scrollX: number;
+        scrollY: number;
+        vScrollBarSlider: Slider | null;
+        hScrollBarSlider: Slider | null;
+
+        extraScrolling: boolean;
+        autoScrollContextLines: any;
+        autoScrollContextColumns: any;
+        firstLineRightShift: any;
+
+        tabWidth: number;
+        wordWrap: boolean;
+        lineWrap: boolean;
+        hiddenContent: boolean;
+        stateMachine: any;
+        
+        textAreaWidth: number;
+        textAreaHeight: number;
+        textBuffer: TextBuffer | null;
+        altTextBuffer: TextBuffer | null;
+        strictInlineSupport: boolean;
+
+        constructor( options: Partial<TextBoxOptions> );
+
+        private initChildren(): void;
+
+        onParentResize(): void;
+        setSizeAndPosition(options: any): void;
+        preDrawSelf(): void;
+        scrollTo(x: any, y: any, noDraw?: boolean): void;
+        scroll(dx: any, dy: any, dontDraw?: boolean): void;
+        scrollToTop(dontDraw?: boolean): void;
+        scrollToBottom(dontDraw?: boolean): void;
+        autoScrollAndDraw(onlyDrawCursorExceptIfScrolled?: boolean, noDraw?: boolean): void;
+        autoScrollAndSmartDraw(): void;
+        setAttr(textAttr?: any, voidAttr?: any, dontDraw?: boolean, dontSetContent?: boolean): void;
+        setAltAttr(altTextAttr?: any): void;
+        getContentSize(): {
+            width: number;
+            height: number;
+        };
+        getContent(): string;
+        setContent(content: string, hasMarkup?: boolean, dontDraw?: boolean): void;
+        getAltContent(): string | null;
+        setAltContent(content: string, hasMarkup?: boolean, dontDraw?: boolean): void;
+        prependContent(content: string, dontDraw?: boolean): void;
+        appendContent(content: string, dontDraw?: boolean): void;
+        appendLog(content: string, dontDraw?: boolean): void;
+        private addContent(content: string, mode: string, dontDraw?: boolean): void;
+        setTabWidth(tabWidth: number, internal?: boolean): void;
+
+        setStateMachine(stateMachine: any, internal?: boolean): void;
+    
+    }
+
+    class EditableTextBox extends TextBox {
+        constructor( options: any );
+    }
+
+    class Button extends Text {
         constructor(options:Partial<ButtonOptions>);
 
         setContent(content: any, hasMarkup: boolean, dontDraw?: boolean, dontResize?: boolean): void;
@@ -112,7 +273,7 @@ declare module 'terminal-kit' {
     }
 
     class LabeledInput extends Element {
-        input:any;
+        input:EditableTextBox;
 
         constructor(options:Partial<LabeledInputOptions>);
 
@@ -137,20 +298,23 @@ declare module 'terminal-kit' {
         hScrollBar: boolean,
     }
 
-
     type Bindings = Record<string, string>;
 
-    interface ElementOptions {
-        internal: boolean;
-        parent: unknown;
-        id: string;
+    interface CoordsOptions {
         y: number;
         x: number;
         height: number;
-        width: number;
+        width: number;    
+    }
+
+    interface ElementOptions extends CoordsOptions {
+        internal: boolean;
+        parent: unknown;
+        id: string;
         meta: any;
+
         content: string;
-        contentHasMarkup: any;
+        contentHasMarkup: boolean;
 
         outputDst: any;
         childId: any;
@@ -192,6 +356,27 @@ declare module 'terminal-kit' {
         rightPadding: string;
     }
 
+    interface TextBoxOptions extends ElementOptions, ScrollableOptions {
+
+        // keyBindings?: any;
+        textAttr: Partial<Attr>;
+        altTextAttr: Partial<Attr>;
+        voidAttr: Partial<Attr>;
+
+        scrollX: number;
+        scrollY: number;
+        extraScrolling: boolean;
+        autoScrollContextLines: number;
+        autoScrollContextColumns: number;
+
+        firstLineRightShift: number;
+        tabWidth: number;
+        wordWrap: boolean;
+        lineWrap: boolean;
+        hiddenContent: boolean;
+        // stateMachine: any; // https://github.com/cronvel/text-machine/
+        noDraw: boolean;
+    }
 
     interface LayoutOptions extends ElementOptions {
         boxChars: Terminal.CustomBorderObject | Terminal.BuiltinBorder;
@@ -230,5 +415,55 @@ declare module 'terminal-kit' {
 
     }
     
+    interface ButtonOptions extends ElementOptions {
+        leftPadding: string;
+        rightPadding: string;
+        
+        blurLeftPadding: string;
+        blurRightPadding: string;
+        
+        focusLeftPadding: string;
+        focusRightPadding: string;
+        
+        disabledLeftPadding: string;
+        disabledRightPadding: string;
+
+        submittedLeftPadding: string;
+        submittedRightPadding: string;
+
+        turnedOnBlurLeftPadding: string;
+        turnedOnLeftPadding: string;
+        turnedOnBlurRightPadding: string;
+        turnedOnRightPadding: string;
+        turnedOnFocusLeftPadding: string;
+        turnedOnFocusRightPadding: string;
+
+        turnedOffBlurLeftPadding: string;
+        turnedOffLeftPadding: string;
+        turnedOffBlurRightPadding: string;
+        turnedOffRightPadding: string;
+        turnedOffFocusLeftPadding: string;
+        turnedOffFocusRightPadding: string;
+
+        blurAttr: Partial<Attr>;
+        focusAttr: Partial<Attr>;
+        disabledAttr: Partial<Attr>;
+        submittedAttr: Partial<Attr>;
+        turnedOnBlurAttr: Partial<Attr>;
+        turnedOnFocusAttr: Partial<Attr>;
+        turnedOffBlurAttr: Partial<Attr>;
+        turnedOffFocusAttr: Partial<Attr>;
+
+        contentHasMarkup: boolean;
+        paddingHasMarkup: boolean;
+
+        // internalRole: any;
+        disabled: boolean;
+        submitted: any;
+        submitOnce: boolean;
+        keyBindings: Binding;
+        actionKeyBindings: Binding;
+        noDraw: boolean;
+    }
 
 }
