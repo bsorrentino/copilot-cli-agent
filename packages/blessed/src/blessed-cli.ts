@@ -10,8 +10,7 @@ import {
   Progress, 
   banner, 
   scanFolderAndImportPackage 
-} from './copilot-cli-agent';
-import EventEmitter from 'node:events';
+} from 'copilot-cli-core';
 
 const toInt = ( v: number | string ): number  => 
     ( typeof v ==='string' ) ? parseInt( v ) : v ;
