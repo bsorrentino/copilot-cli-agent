@@ -117,6 +117,22 @@ declare module 'terminal-kit' {
         drawRow(computed: any, tees: any, last: any): void;
     }
 
+    class AnimatedText extends Text {
+        animation: any;
+        isAnimated: boolean;
+        frameDuration: any;
+        animationSpeed: any;
+        frame: any;
+        autoUpdateTimer: number | null;
+        autoUpdate: any;
+        inlineCursorRestoreAfterDraw: boolean;
+        content: any;
+
+        constructor(options: any);
+
+        animate(animationSpeed?: number): void;
+    }
+    
     class Slider extends Element {
 
         constructor(options: any);

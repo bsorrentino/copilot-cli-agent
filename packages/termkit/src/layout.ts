@@ -48,37 +48,6 @@ const layout = new termkit.Layout( {
 // layout.draw() ;
 // layout.setAutoResize( true ) ;
 
-
-// new termkit.Text( {
-// 	parent: document.elements.percent ,
-// 	content: 'Percent sized box' ,
-// 	attr: { color: 'red' }
-// } ) ;
-
-// new termkit.Text( {
-// 	parent: document.elements.auto ,
-// 	content: 'Auto sized box' ,
-// 	attr: { color: 'green' , italic: true }
-// } ) ;
-
-// new termkit.Text( {
-// 	parent: document.elements.auto2 ,
-// 	content: 'Auto sized box (2)' ,
-// 	attr: { color: 'yellow' , italic: true }
-// } ) ;
-
-// new termkit.Text( {
-// 	parent: document.elements.fixed ,
-// 	content: 'Fixed size box' ,
-// 	attr: { color: 'cyan' , bold: true }
-// } ) ;
-
-// new termkit.Text( {
-// 	parent: document.elements.fixed2 ,
-// 	content: 'Fixed size box (2)' ,
-// 	attr: { color: 'magenta' , bold: true }
-// } ) ;
-
 new termkit.Text( {
 	parent: document.elements.title,
 	content: "AI Prompt" ,
@@ -94,13 +63,13 @@ const prompt = new termkit.LabeledInput( {
 	label: 'prompt: ',
 	// x: 5 ,
 	// y: 10 ,
-	autoWidth: 1,
-	width: term.width - 2 ,
+	width: document.elements.prompt.outputWidth - 2 ,
 	height: 5 ,
 	allowNewLine: true,
 	scrollable: true,
 	vScrollBar: false,
 	hScrollBar: false,
+	autoWidth: 1,
 	
 } ) ;
 
@@ -110,7 +79,7 @@ const submit = new termkit.Button( {
 	focusAttr: { bgColor: '@light-gray' } ,
 	contentHasMarkup: true ,
 	value: 'submitButton' ,
-	x: prompt.outputWidth - 8 ,
+	x: document.elements.prompt.outputWidth - 8 ,
 	y: 5 ,
 } ) ;
 
@@ -118,8 +87,10 @@ const output = new termkit.TextBox({
 	parent: document.elements.content,	
 	scrollable: true,
 	vScrollBar: true,
-	width: term.width - 2,
+	width: document.elements.content.outputWidth,
 	height: document.elements.content.outputHeight,
+	autoHeight: 1,
+	autoWidth: 1
 });
 
 function log( msg:string, y = term.height ) {
@@ -130,16 +101,11 @@ function log( msg:string, y = term.height ) {
 	term.restoreCursor() ;
 }
 
-function onSubmit( value: string )
-{
-	output.appendLog( `Submitted: ${value}\n` ) ;
-}
-
 log( `term.width: ${term.width}` ) ;
 // document.focusNext();
 document.giveFocusTo( prompt ) ;
 
-term.on( 'key' ,  (key:string) => {
+term.on( 'key',  (key:string) => {
     
 	switch( key )
 	{
@@ -154,7 +120,18 @@ term.on( 'key' ,  (key:string) => {
 			log( `key: ${key}`, term.height - 1 ) ;
             term.restoreCursor() ;
 	}
-} ) ;
+}) ; 
+
+function onSubmit( value: string ) {
+
+	term.spinner( 'asciiSpinner' )
+			.then( s => { s.animate(1) ; return s })
+			.then( s => setTimeout( () => { 
+				s.animate(false)
+				output.appendLog( value );
+				document.giveFocusTo( prompt ) ;
+			}, 2000 ) );				
+}
 
 submit.on( 'submit' , ( v ) => onSubmit( prompt.getValue() ) ) ;
 submit.on( 'parentResize' , (coords:CoordsOptions) => 
@@ -168,10 +145,5 @@ prompt.on( 'parentResize' , (arg:CoordsOptions) =>  {
 	prompt.input.autoWidth =  1
 	// fix: propagate resize event to input component
 	prompt.input.onParentResize()
-	
-}) ;
+});
 
-// term.on( 'resize' , ( w:number, h:number ) => {
-// 	log( `resize w: ${w} - h: ${h} - outputDst: ${prompt.input.outputDst.width}` ) ;
-// })
-//term.moveTo( 1 , term.height ) ;
