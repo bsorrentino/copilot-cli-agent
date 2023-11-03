@@ -4,7 +4,12 @@ import path from 'node:path'
 import pc from 'picocolors'
 import { intro, outro, text, isCancel, spinner } from '@clack/prompts';
 
-import { CopilotCliAgentExecutor, ExecutionContext, Progress, banner, scanFolderAndImportPackage } from './copilot-cli-agent.js';
+import { 
+  CopilotCliAgentExecutor, 
+  ExecutionContext, 
+  Progress, 
+  banner, 
+  scanFolderAndImportPackage } from 'copilot-cli-core';
 
 const __filename = fileURLToPath(import.meta.url);
 
@@ -21,11 +26,17 @@ const execContext:ExecutionContext = {
 
 const main = async () => {
 
-  const _modules = await scanFolderAndImportPackage( path.join( __dirname, 'commands') );
+  // const _modules = await scanFolderAndImportPackage( path.join( __dirname, 'commands') );
+
+  const commandPath = process.env['COMMANDS_PATH'];
+  if(!commandPath ) {
+    throw new Error("'COMMANDS_PATH' environment variable is not defined!");
+  }
+  const _modules = await scanFolderAndImportPackage( commandPath );
   
   const executor = await CopilotCliAgentExecutor.create( _modules, execContext );
 
-  const _banner = await banner(__dirname);
+  const _banner = await banner();
 
   intro( pc.green(_banner));
   
@@ -33,7 +44,7 @@ const main = async () => {
 
     const input = await text({
       message: 'Which commands would you like me to execute? ',
-      placeholder: '',
+      placeholder: 'input prompt',
       initialValue: '',
       validate(value) {
         

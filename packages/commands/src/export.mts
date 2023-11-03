@@ -1,7 +1,7 @@
 import { CallbackManagerForToolRun } from "langchain/callbacks";
 import { z } from "zod";
 
-import { CommandTool, ExecutionContext } from "../copilot-cli-agent";
+import { CommandTool, ExecutionContext } from "copilot-cli-core";
 
 const ExportSchema = z.object({
     solution: z.string().describe("the remote solution name")

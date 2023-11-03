@@ -17,7 +17,6 @@
   "author": "bsorrentino <bartolomeo.sorrentino@gmail.com> (http://soulsoftware-bsc.blogspot.it/)",
   "license": "MIT",
   "dependencies": {
-    "dotenv": "^16.3.1"
     
   },
   "devDependencies": {
