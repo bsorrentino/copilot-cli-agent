@@ -1,6 +1,6 @@
-//// <reference path="../types/terminal-kit.d.ts" />
-"use strict";
+import 'dotenv/config';
 import termkit from '@bsorrentino/terminal-kit';
+import { CopilotCliAgentExecutor, scanFolderAndImportPackage } from 'copilot-cli-core';
 const term = termkit.terminal;
 const document = term.createDocument();
 term.clear();
@@ -89,10 +89,13 @@ function log(msg, y = term.height) {
     term.moveTo.styleReset.eraseLine(1, y, msg);
     term.restoreCursor();
 }
-log(`term.width: ${term.width}`);
-log(`prompt.input.autoWidth: ${prompt.input.autoWidth}`, term.height - 1);
-// document.focusNext();
-document.giveFocusTo(prompt);
+const execContext = {
+    log: (msg) => output.appendLog(msg),
+    progress: () => ({
+        start: (msg) => { },
+        stop: () => { }
+    })
+};
 term.on('key', (key) => {
     switch (key) {
         case 'CTRL_C':
@@ -107,18 +110,11 @@ term.on('key', (key) => {
             term.restoreCursor();
     }
 });
-function onSubmit(value) {
-    term.spinner('asciiSpinner')
-        .then(s => { s.animate(1); return s; })
-        .then(s => setTimeout(() => {
-        s.animate(false);
-        output.appendLog(value);
-        document.giveFocusTo(prompt);
-    }, 2000));
-}
-submit.on('submit', (v) => onSubmit(prompt.getValue()));
+log(`term.width: ${term.width}`);
+log(`prompt.input.autoWidth: ${prompt.input.autoWidth}`, term.height - 1);
+// document.focusNext();
+document.giveFocusTo(prompt);
 submit.on('parentResize', (coords) => submit.outputX = coords.width - 8);
-prompt.on('submit', onSubmit);
 prompt.on('parentResize', (arg) => {
     // fix: pass autowidth to input component
     // fix must be applied in "LabeledInput.prototype.initTextInput"
@@ -126,3 +122,27 @@ prompt.on('parentResize', (arg) => {
     // fix: propagate resize event to input component
     prompt.input.onParentResize();
 });
+const main = async () => {
+    const commandPath = process.env['COMMANDS_PATH'];
+    if (!commandPath) {
+        throw new Error("'COMMANDS_PATH' environment variable is not defined!");
+    }
+    const _modules = await scanFolderAndImportPackage(commandPath);
+    const executor = await CopilotCliAgentExecutor.create(_modules, execContext);
+    function onSubmit(input) {
+        term.spinner('asciiSpinner')
+            .then(s => {
+            s.animate(1);
+            executor.run(input)
+                .then(result => execContext.log(result))
+                .catch(e => execContext.log(e))
+                .finally(() => {
+                s.animate(false);
+                document.giveFocusTo(prompt);
+            });
+        });
+    }
+    submit.on('submit', (v) => onSubmit(prompt.getValue()));
+    prompt.on('submit', onSubmit);
+};
+main();

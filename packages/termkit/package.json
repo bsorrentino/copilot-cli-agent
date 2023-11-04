@@ -25,7 +25,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "start": "node lib/layout.js"
+    "start": "node lib/layout.js dotenv_config_path=../../.env"
   },
   "bugs": {
     "url": "https://github.com/bsorrentino/copilot-cli-agent/issues"
@@ -35,7 +35,7 @@
     "@types/node": "^20.8.10"
   },
   "dependencies": {
-    "@bsorrentino/terminal-kit": "3.0.1-build4",
+    "@bsorrentino/terminal-kit": "3.0.1-build5",
     "copilot-cli-core": "*"
   }
 }
