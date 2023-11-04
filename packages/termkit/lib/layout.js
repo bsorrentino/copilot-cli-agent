@@ -1,6 +1,6 @@
 //// <reference path="../types/terminal-kit.d.ts" />
 "use strict";
-import termkit from 'terminal-kit';
+import termkit from '@bsorrentino/terminal-kit';
 const term = termkit.terminal;
 const document = term.createDocument();
 term.clear();
@@ -90,6 +90,7 @@ function log(msg, y = term.height) {
     term.restoreCursor();
 }
 log(`term.width: ${term.width}`);
+log(`prompt.input.autoWidth: ${prompt.input.autoWidth}`, term.height - 1);
 // document.focusNext();
 document.giveFocusTo(prompt);
 term.on('key', (key) => {
@@ -112,7 +113,6 @@ function onSubmit(value) {
         .then(s => setTimeout(() => {
         s.animate(false);
         output.appendLog(value);
-        //submit.redraw()
         document.giveFocusTo(prompt);
     }, 2000));
 }
@@ -122,7 +122,7 @@ prompt.on('submit', onSubmit);
 prompt.on('parentResize', (arg) => {
     // fix: pass autowidth to input component
     // fix must be applied in "LabeledInput.prototype.initTextInput"
-    prompt.input.autoWidth = 1;
+    // prompt.input.autoWidth =  1
     // fix: propagate resize event to input component
     prompt.input.onParentResize();
 });

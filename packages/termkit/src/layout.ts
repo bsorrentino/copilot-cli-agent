@@ -1,7 +1,7 @@
 //// <reference path="../types/terminal-kit.d.ts" />
 "use strict" ;
 
-import termkit, { CoordsOptions, TerminalEx } from 'terminal-kit' ;
+import termkit, { CoordsOptions, TerminalEx } from '@bsorrentino/terminal-kit' ;
 
 const term = termkit.terminal as TerminalEx ;
 
@@ -102,6 +102,8 @@ function log( msg:string, y = term.height ) {
 }
 
 log( `term.width: ${term.width}` ) ;
+log( `prompt.input.autoWidth: ${prompt.input.autoWidth}`, term.height - 1 ) ;
+
 // document.focusNext();
 document.giveFocusTo( prompt ) ;
 
@@ -142,7 +144,7 @@ prompt.on( 'submit' , onSubmit ) ;
 prompt.on( 'parentResize' , (arg:CoordsOptions) =>  {
 	// fix: pass autowidth to input component
 	// fix must be applied in "LabeledInput.prototype.initTextInput"
-	prompt.input.autoWidth =  1
+	// prompt.input.autoWidth =  1
 	// fix: propagate resize event to input component
 	prompt.input.onParentResize()
 });

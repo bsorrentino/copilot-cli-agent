@@ -32,11 +32,10 @@
   },
   "devDependencies": {
     "@types/nextgen-events": "^1.1.3",
-    "@types/node": "^20.8.10",
-    "@types/terminal-kit": "^2.5.3"
+    "@types/node": "^20.8.10"
   },
   "dependencies": {
-    "terminal-kit": "^3.0.1",
+    "@bsorrentino/terminal-kit": "3.0.1-build3",
     "copilot-cli-core": "*"
   }
 }

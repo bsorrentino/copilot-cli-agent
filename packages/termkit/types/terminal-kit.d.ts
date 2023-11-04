@@ -1,7 +1,7 @@
 import type NextGenEvents from 'nextgen-events';
-import { Terminal } from 'terminal-kit';
+import { Terminal } from '@bsorrentino/terminal-kit';
 
-declare module 'terminal-kit' {
+declare module '@bsorrentino/terminal-kit' {
 
     interface GlobalEventHandlersEventMap {
         parentResize: "parentResize"
