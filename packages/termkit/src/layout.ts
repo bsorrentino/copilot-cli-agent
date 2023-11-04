@@ -1,9 +1,9 @@
 //// <reference path="../types/terminal-kit.d.ts" />
 "use strict" ;
 
-import termkit, { CoordsOptions, TerminalEx } from '@bsorrentino/terminal-kit' ;
+import termkit, { CoordsOptions } from '@bsorrentino/terminal-kit' ;
 
-const term = termkit.terminal as TerminalEx ;
+const term = termkit.terminal ;
 
 const document = term.createDocument() ;
 
