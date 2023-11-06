@@ -89,11 +89,13 @@ const output = new termkit.TextBox({
 	autoWidth: 1
 });
 
-function log( msg:string, y = term.height ) {
+
+
+function _log( msg:string, y = term.height ) {
 	if( y > term.height ) { y = term.height ; }
 
 	term.saveCursor() ;
-	term.moveTo.styleReset.eraseLine( 1 , y , msg ) ;
+	term.moveTo.styleReset.eraseLine( 2 , y, msg ) ;
 	term.restoreCursor() ;
 }
 
@@ -121,13 +123,38 @@ term.on( 'key',  (key:string) => {
 			process.exit() ;
 		default: 
 			term.saveCursor() ;
-			log( `key: ${key}`, term.height - 1 ) ;
+			// _log( `key: ${key}`, term.height - 1 ) ;
 			term.restoreCursor() ;
 	}
 }) ; 
 
-log( `term.width: ${term.width}` ) ;
-log( `prompt.input.autoWidth: ${prompt.input.autoWidth}`, term.height - 1 ) ;
+function spinner( content: string, task: Promise<void>):void {
+
+	const spinner = new termkit.AnimatedText( {
+		parent: document ,
+		animation: 'asciiSpinner' ,
+		x: 0 ,
+		y: term.height - 1,
+		attr: { bgColor: "white", color: "black" }
+	}) ;
+	const text = new termkit.Text( {
+		parent: document,
+		x: 1,
+		y: term.height - 1,
+		content: " running ...",
+		attr: { bgColor: "white", color: "black" }
+	})
+	
+	term.hideCursor(true);
+	task.finally(() => {
+		spinner.destroy();
+		text.destroy();
+		term.hideCursor(false);
+	})
+}
+
+// log( `term.width: ${term.width}` ) ;
+// log( `prompt.input.autoWidth: ${prompt.input.autoWidth}`, term.height - 1 ) ;
 
 // document.focusNext();
 document.giveFocusTo( prompt ) ;
@@ -156,18 +183,15 @@ const main = async () => {
 	
 	function onSubmit( input: string ) {
 	
-		term.spinner( 'asciiSpinner' )
-				.then( s => { 
-					s.animate(1)
-					executor.run( input )
-						.then( result => execContext.log(result) )
-						.catch( e => execContext.log( e ))
-						.finally( () => {
-							s.animate(false);
-							document.giveFocusTo( prompt );
-						});
+		spinner( 'running...' , 
+
+			executor.run( input )
+				.then( result => { /* execContext.log(result) */ } )
+				.catch( e => execContext.log( e ))
+				.finally( () => {
+					document.giveFocusTo( prompt );
 				})
-					
+		);		
 	}
 	
 	submit.on( 'submit' , ( v ) => onSubmit( prompt.getValue() ) ) ;

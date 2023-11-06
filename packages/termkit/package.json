@@ -35,7 +35,7 @@
     "@types/node": "^20.8.10"
   },
   "dependencies": {
-    "@bsorrentino/terminal-kit": "3.0.1-build5",
+    "@bsorrentino/terminal-kit": "3.0.1-build6",
     "copilot-cli-core": "*"
   }
 }
