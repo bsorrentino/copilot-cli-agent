@@ -1,25 +1,27 @@
 {
   "name": "langchain-copilot-cli",
-  "version": "1.0-build3",
+  "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-  "type": "module",
+  "main": "dist/cjs/blessed-cli.js",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "build": "tsc ; cp src/banner.txt dist",
-    "start": "npm run build; node dist/copilot-cli-agent.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "npm run build --workspaces",
+    "blessed:build": "tsc",
+    "simple:run": "npm run start -w simple-cli",
+    "termkit:run": "npm run start -w termkit-cli"
   },
   "keywords": [],
   "author": "bsorrentino <bartolomeo.sorrentino@gmail.com> (http://soulsoftware-bsc.blogspot.it/)",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
-    "@clack/prompts": "^0.7.0",
-    "dotenv": "^16.3.1",
-    "langchain": "^0.0.141",
-    "picocolors": "^1.0.0",
-    "zod": "^3.22.2"
+    
   },
   "devDependencies": {
-    "typescript": "^5.2.2"
+    "@types/node": "^20.8.9",
+    "lerna": "^7.4.2",
+    "typescript": "^5.2.2",
+    "tsx": "^3.14.0"
   }
 }

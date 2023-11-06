@@ -1,0 +1,41 @@
+{
+  "name": "termkit-cli",
+  "version": "1.0.0",
+  "description": "terminal-kit copilot cli implementation ",
+  "type": "module",
+  "keywords": [
+    "ai",
+    "copilot",
+    "term-kit"
+  ],
+  "author": "bsorrentino <bartolomeo.sorrentino@gmail.com> (http://soulsoftware-bsc.blogspot.it/)",
+  "homepage": "https://github.com/bsorrentino/copilot-cli-agent#readme",
+  "license": "MIT",
+  "main": "lib/termkit-cli",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bsorrentino/copilot-cli-agent.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node lib/layout.js dotenv_config_path=../../.env"
+  },
+  "bugs": {
+    "url": "https://github.com/bsorrentino/copilot-cli-agent/issues"
+  },
+  "devDependencies": {
+    "@types/nextgen-events": "^1.1.3",
+    "@types/node": "^20.8.10"
+  },
+  "dependencies": {
+    "@bsorrentino/terminal-kit": "3.0.1-build6",
+    "copilot-cli-core": "*"
+  }
+}

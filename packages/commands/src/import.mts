@@ -1,6 +1,6 @@
 import { CallbackManagerForToolRun } from "langchain/callbacks";
-import { StructuredTool } from "langchain/tools";
 import { z } from "zod";
+import { CommandTool, ExecutionContext } from "copilot-cli-core";
 
 
 const ImportSchema = z.object({
@@ -13,12 +13,16 @@ const ImportSchema = z.object({
                     .optional()
                     .default("managed"),
   })
-  class ImportSolutionTool extends StructuredTool<typeof ImportSchema> {
+  class ImportSolutionTool extends CommandTool<typeof ImportSchema> {
   
     name = "import_solution"
     description = "import a dataverse solution to remote environment"
     schema = ImportSchema
   
+    constructor( execContext?: ExecutionContext ) {
+      super(execContext)
+    }
+
     async _call(arg: z.output<typeof ImportSchema>, runManager?: CallbackManagerForToolRun): Promise<string> {
       console.debug( "Import Solution:", arg)
       // return "import executed! please revise prompt removing import command"
@@ -26,4 +30,6 @@ const ImportSchema = z.object({
     }
   }
 
-  export default new ImportSolutionTool()
+  const createTool = ( execContext?: ExecutionContext  ) => new ImportSolutionTool( execContext )
+
+  export default createTool

@@ -12,8 +12,15 @@ Discover the potential of integrating AI into your Command Line Interface (CLI) 
 - **Custom Commands**: Extend your CLI with custom commands using natural language processing.
 - **[OpenAI Functions Agent]**: Utilize GPT 3/4's function calling abilities to generate necessary inputs.
 
-## Implementation
+## AI Implementation
 The solution is based on the [Langchain.js] Framework and [OpenAI Functions Agent]. By combining Langchain and [ReACT], you can create specialized tools for each command you want to integrate into your CLI. These tools understand natural language input, process it, and generate appropriate responses based on the context.
+
+## CLI implementation 
+This CLI provides the follow implementation:
+- **simple-cli** - A simple CLI build on to of [@clack/prompts][clack-prompts]
+- **termkit-cli** - A CLI build on my [forked version][termkit-forked] of [terminal-kit][termkit] an amazing terminal lib for Node.js.
+ ![](copilot-cli-agent.gif)
+
 
 ## Debugging and Monitoring
 The [LangSmith] platform, part of the [LangChain] suite, allows for debugging, testing, evaluating, and monitoring chains and intelligent agents built on any LLM framework.
@@ -39,4 +46,6 @@ Experience the magic of integrating AI into your CLI. With LLM models like GPT 3
 [LangSmith]: https://smith.langchain.com
 [project]: https://github.com/bsorrentino/copilot-cli-agent
 [OpenAI Functions Agent]: https://js.langchain.com/docs/modules/agents/agent_types/openai_functions_agent
-
+[termkit]: https://github.com/cronvel/terminal-kit
+[termkit-forked]: https://github.com/bsorrentino/terminal-kit
+[clack-prompts]: https://www.npmjs.com/package/@clack/prompts
