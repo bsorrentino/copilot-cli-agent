@@ -5,7 +5,7 @@ const term = termkit.terminal;
 const document = term.createDocument();
 term.clear();
 // term.hideCursor() ;
-const layout = new termkit.Layout({
+new termkit.Layout({
     parent: document,
     boxChars: 'lightRounded',
     layout: {
@@ -39,8 +39,6 @@ const layout = new termkit.Layout({
         ]
     }
 });
-// layout.draw() ;
-// layout.setAutoResize( true ) ;
 new termkit.Text({
     parent: document.elements.title,
     content: "AI Prompt",

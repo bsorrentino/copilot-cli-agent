@@ -7,11 +7,10 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.esm.json; cp src/banner.txt dist",
+    "build": "npm run build --workspaces",
     "blessed:build": "tsc",
-    "simple:run": "npm run build; node dist/mjs/simple-cli.js",
-    "blessed:run": "npm run blessed:build; node dist/cjs/blessed-cli.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "simple:run": "npm run start -w simple-cli",
+    "termkit:run": "npm run start -w termkit-cli"
   },
   "keywords": [],
   "author": "bsorrentino <bartolomeo.sorrentino@gmail.com> (http://soulsoftware-bsc.blogspot.it/)",
