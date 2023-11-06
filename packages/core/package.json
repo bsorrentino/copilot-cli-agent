@@ -1,6 +1,6 @@
 {
   "name": "copilot-cli-core",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "copilot-cli core compoment ",
   "type":"module",
   "keywords": [

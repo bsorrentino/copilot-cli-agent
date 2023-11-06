@@ -1,6 +1,6 @@
 {
   "name": "langchain-copilot-cli",
-  "version": "1.0-build3",
+  "version": "1.0.0",
   "description": "",
   "main": "dist/cjs/blessed-cli.js",
   "workspaces": [
