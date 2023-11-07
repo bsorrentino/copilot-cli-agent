@@ -3,7 +3,6 @@ import termkit from '@bsorrentino/terminal-kit';
 import { CopilotCliAgentExecutor, scanFolderAndImportPackage } from 'copilot-cli-core';
 const term = termkit.terminal;
 const document = term.createDocument();
-document.outputWidth = term.width - 5;
 term.clear();
 // term.hideCursor() ;
 new termkit.Layout({
@@ -158,7 +157,7 @@ const main = async () => {
             document.giveFocusTo(prompt);
         }));
     }
-    submit.on('submit', (v) => onSubmit(prompt.getValue()));
+    submit.on('submit', () => onSubmit(prompt.getValue()));
     prompt.on('submit', onSubmit);
 };
 main();

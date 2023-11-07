@@ -89,8 +89,6 @@ const output = new termkit.TextBox({
 	autoWidth: 1
 });
 
-
-
 function _log( msg:string, y = term.height ) {
 	if( y > term.height ) { y = term.height ; }
 
@@ -194,7 +192,7 @@ const main = async () => {
 		);		
 	}
 	
-	submit.on( 'submit' , ( v ) => onSubmit( prompt.getValue() ) ) ;
+	submit.on( 'submit' , ( ) => onSubmit( prompt.getValue() ) ) ;
 	
 	prompt.on( 'submit' , onSubmit ) ;
 	
