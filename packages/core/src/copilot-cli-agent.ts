@@ -39,8 +39,7 @@ export abstract class CommandTool<T extends z.ZodObject<any, any, any, any>> ext
   
   protected execContext?: ExecutionContext;
 
-  constructor( execContext?: ExecutionContext ) {
-    super()
+  setExecutionContext( execContext?: ExecutionContext ) {
     this.execContext = execContext
   }
 }
@@ -64,7 +63,7 @@ export const banner = async (dirname?: string) =>
  * @param folderPath - The absolute path of the folder to scan.
  * @returns A Promise resolving to an array of all imported modules.
  */
-export const scanFolderAndImportPackage = async (folderPath: string) => {
+export const scanFolderAndImportPackage = async (folderPath: string): Promise<CommandTool<any>[]> => {
   // Ensure the path is absolute
   // if (!path.isAbsolute(folderPath)) {
   //   folderPath = path.join(__dirname, folderPath);
@@ -84,7 +83,13 @@ export const scanFolderAndImportPackage = async (folderPath: string) => {
       .filter(file => path.extname(file) === '.mjs')
       .map(file => import(path.join(folderPath, file)));
   
-  return Promise.all(modules);
+  const result = Promise.all(modules).then( _modules => 
+      _modules
+          .map(m => m?.default)
+          .filter(m => m instanceof CommandTool)
+  );
+
+  return result;
 }
 
 /**
@@ -167,7 +172,7 @@ export const runCommand = async (cmd: string, ctx?: ExecutionContext) => {
 
   export class CopilotCliAgentExecutor {
 
-    public static async create( commandModules: any[], execContext?: ExecutionContext): Promise<CopilotCliAgentExecutor> {
+    public static async create( commandModules: CommandTool<any>[], execContext?: ExecutionContext): Promise<CopilotCliAgentExecutor> {
   
       const model = new ChatOpenAI({
         // modelName: "gpt-4",
@@ -180,9 +185,10 @@ export const runCommand = async (cmd: string, ctx?: ExecutionContext) => {
       });
   
       const loadedTools = commandModules
-        .filter(m => typeof (m?.default.createTool) === 'function')
-        .map(m => m?.default.createTool(execContext))
-        .filter(m => m && m.name && m.description && m.schema)
+        // .map(m => m?.default)
+        // .filter(m => m instanceof CommandTool)
+        // //.filter(m => m && m.name && m.description && m.schema)
+        // .map(m => m.setExecutionContext(execContext))
   
       const tools = [
         new SystemCommandTool(execContext),

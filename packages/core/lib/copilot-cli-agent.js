@@ -14,8 +14,7 @@ import { PromptTemplate } from 'langchain/prompts';
 */
 export class CommandTool extends StructuredTool {
     execContext;
-    constructor(execContext) {
-        super();
+    setExecutionContext(execContext) {
         this.execContext = execContext;
     }
 }
@@ -52,7 +51,10 @@ export const scanFolderAndImportPackage = async (folderPath) => {
     const modules = files
         .filter(file => path.extname(file) === '.mjs')
         .map(file => import(path.join(folderPath, file)));
-    return Promise.all(modules);
+    const result = Promise.all(modules).then(_modules => _modules
+        .map(m => m?.default)
+        .filter(m => m instanceof CommandTool));
+    return result;
 };
 /**
  * Expands the tilde (~) character in a file path to the user's home directory.
@@ -123,10 +125,11 @@ export class CopilotCliAgentExecutor {
             maxTokens: 600,
             temperature: 0
         });
-        const loadedTools = commandModules
-            .filter(m => typeof (m?.default.createTool) === 'function')
-            .map(m => m?.default.createTool(execContext))
-            .filter(m => m && m.name && m.description && m.schema);
+        const loadedTools = commandModules;
+        // .map(m => m?.default)
+        // .filter(m => m instanceof CommandTool)
+        // //.filter(m => m && m.name && m.description && m.schema)
+        // .map(m => m.setExecutionContext(execContext))
         const tools = [
             new SystemCommandTool(execContext),
             ...loadedTools

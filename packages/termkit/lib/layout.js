@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import termkit from '@bsorrentino/terminal-kit';
 import { CopilotCliAgentExecutor, scanFolderAndImportPackage } from 'copilot-cli-core';
+import { CommandsVindow } from './commands.js';
 const term = termkit.terminal;
 const document = term.createDocument();
 term.clear();
@@ -79,14 +80,6 @@ const output = new termkit.TextBox({
     autoHeight: 1,
     autoWidth: 1
 });
-function _log(msg, y = term.height) {
-    if (y > term.height) {
-        y = term.height;
-    }
-    term.saveCursor();
-    term.moveTo.styleReset.eraseLine(2, y, msg);
-    term.restoreCursor();
-}
 const execContext = {
     log: (msg) => output.appendLog(msg),
     progress: () => ({
@@ -108,6 +101,39 @@ term.on('key', (key) => {
             term.restoreCursor();
     }
 });
+// log( `term.width: ${term.width}` ) ;
+// log( `prompt.input.autoWidth: ${prompt.input.autoWidth}`, term.height - 1 ) ;
+// document.focusNext();
+document.giveFocusTo(prompt);
+submit.on('parentResize', (coords) => submit.outputX = coords.width - 8);
+prompt.on('parentResize', (arg) => {
+    // fix: pass autowidth to input component
+    // fix must be applied in "LabeledInput.prototype.initTextInput"
+    // prompt.input.autoWidth =  1
+    // fix: propagate resize event to input component
+    prompt.input.onParentResize();
+});
+const commands = new CommandsVindow(document);
+const main = async () => {
+    const commandPath = process.env['COMMANDS_PATH'];
+    if (!commandPath) {
+        throw new Error("'COMMANDS_PATH' environment variable is not defined!");
+    }
+    const _modules = await scanFolderAndImportPackage(commandPath);
+    commands.setContent(["system_cmd", ..._modules.map(m => m.name)]);
+    const executor = await CopilotCliAgentExecutor.create(_modules, execContext);
+    function onSubmit(input) {
+        spinner('running...', executor.run(input)
+            .then(result => { })
+            .catch(e => execContext.log(e))
+            .finally(() => {
+            document.giveFocusTo(prompt);
+        }));
+    }
+    submit.on('submit', () => onSubmit(prompt.getValue()));
+    prompt.on('submit', onSubmit);
+};
+main();
 function spinner(content, task) {
     const spinner = new termkit.AnimatedText({
         parent: document,
@@ -130,34 +156,3 @@ function spinner(content, task) {
         term.hideCursor(false);
     });
 }
-// log( `term.width: ${term.width}` ) ;
-// log( `prompt.input.autoWidth: ${prompt.input.autoWidth}`, term.height - 1 ) ;
-// document.focusNext();
-document.giveFocusTo(prompt);
-submit.on('parentResize', (coords) => submit.outputX = coords.width - 8);
-prompt.on('parentResize', (arg) => {
-    // fix: pass autowidth to input component
-    // fix must be applied in "LabeledInput.prototype.initTextInput"
-    // prompt.input.autoWidth =  1
-    // fix: propagate resize event to input component
-    prompt.input.onParentResize();
-});
-const main = async () => {
-    const commandPath = process.env['COMMANDS_PATH'];
-    if (!commandPath) {
-        throw new Error("'COMMANDS_PATH' environment variable is not defined!");
-    }
-    const _modules = await scanFolderAndImportPackage(commandPath);
-    const executor = await CopilotCliAgentExecutor.create(_modules, execContext);
-    function onSubmit(input) {
-        spinner('running...', executor.run(input)
-            .then(result => { })
-            .catch(e => execContext.log(e))
-            .finally(() => {
-            document.giveFocusTo(prompt);
-        }));
-    }
-    submit.on('submit', () => onSubmit(prompt.getValue()));
-    prompt.on('submit', onSubmit);
-};
-main();
