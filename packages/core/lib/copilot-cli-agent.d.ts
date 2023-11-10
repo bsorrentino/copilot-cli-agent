@@ -24,7 +24,7 @@ export interface ExecutionContext {
 */
 export declare abstract class CommandTool<T extends z.ZodObject<any, any, any, any>> extends StructuredTool<T> {
     protected execContext?: ExecutionContext;
-    constructor(execContext?: ExecutionContext);
+    setExecutionContext(execContext?: ExecutionContext): void;
 }
 /**
  * Loads and returns the contents of the banner.txt file.
@@ -43,7 +43,7 @@ export declare const banner: (dirname?: string) => Promise<string>;
  * @param folderPath - The absolute path of the folder to scan.
  * @returns A Promise resolving to an array of all imported modules.
  */
-export declare const scanFolderAndImportPackage: (folderPath: string) => Promise<any[]>;
+export declare const scanFolderAndImportPackage: (folderPath: string) => Promise<CommandTool<any>[]>;
 /**
  * Expands the tilde (~) character in a file path to the user's home directory.
  *
@@ -60,7 +60,7 @@ export declare const expandTilde: (filePath: string) => string;
  */
 export declare const runCommand: (cmd: string, ctx?: ExecutionContext) => Promise<string>;
 export declare class CopilotCliAgentExecutor {
-    static create(commandModules: any[], execContext?: ExecutionContext): Promise<CopilotCliAgentExecutor>;
+    static create(commandModules: CommandTool<any>[], execContext?: ExecutionContext): Promise<CopilotCliAgentExecutor>;
     private agent;
     private mainPromptTemplate;
     private constructor();

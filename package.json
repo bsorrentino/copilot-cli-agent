@@ -10,7 +10,8 @@
     "build": "npm run build --workspaces",
     "blessed:build": "tsc",
     "simple:run": "npm run start -w simple-cli",
-    "termkit:run": "npm run start -w termkit-cli"
+    "termkit:build": "npm run build -w termkit-cli",
+    "termkit:start": "npm run start -w termkit-cli"
   },
   "keywords": [],
   "author": "bsorrentino <bartolomeo.sorrentino@gmail.com> (http://soulsoftware-bsc.blogspot.it/)",

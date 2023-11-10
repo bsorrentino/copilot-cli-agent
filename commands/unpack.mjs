@@ -26,9 +26,6 @@ export class UnpackSolutionTool extends CommandTool {
     name = "unpack_solution";
     description = "unpack dataverse solution zip file to a folder";
     schema = UnpackSchema;
-    constructor(execContext) {
-        super(execContext);
-    }
     /**
      * Unpacks dataverse solution ZIP file.
      *
@@ -46,5 +43,4 @@ export class UnpackSolutionTool extends CommandTool {
         return `unpack executed! ${solution}`;
     }
 }
-const createTool = (execContext) => new UnpackSolutionTool(execContext);
-export default createTool;
+export default new UnpackSolutionTool();

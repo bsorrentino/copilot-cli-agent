@@ -1,15 +1,10 @@
 import termkit, { Document, FocusType } from '@bsorrentino/terminal-kit' ;
 
-function _log( msg:string ) {
-    const term = termkit.terminal
-
-    term.saveCursor() ;
-	term.moveTo.styleReset.eraseLine( 2 , term.height, msg ) ;
-	term.restoreCursor() ;
-}
 
 export class CommandsVindow {
 	private win:termkit.Window|null = null
+	#content:string[] = []
+	#iter = 1
 
 	constructor( private document: Document ) {
 		const menuWidth = 15
@@ -60,9 +55,9 @@ export class CommandsVindow {
 				document.focusNext()
 			}
 			else {
-				this.win = createCommands(document);
+				this.win = createCommands(document, this.#content);
 				this.win.on( "focus", ( focus:boolean , type:FocusType ) => {
-                    _log( `${focus} - ${type}`)
+                    // this.#log( `${focus} - ${type}`)
 					if( !focus && type === 'select') {
 						this.dismiss()
 					}
@@ -76,12 +71,25 @@ export class CommandsVindow {
         this.win?.destroy()
         this.win = null
     }
+
+	setContent( content:string[] ) {
+		// const content1 = Array.from( { length: 30 } ).map( ( _ , i ) => `${i}th line of content...` ) ;
+		// this.#log( content[0] )
+		this.#content = content ;
+	}
+
+	#log( msg:string ) {
+		const term = termkit.terminal
+	
+		term.saveCursor() ;
+		term.moveTo.styleReset.eraseLine( 2 , term.height, `${msg} - ${this.#iter++}` ) ; ;
+		term.restoreCursor() ;
+	}
+	
 }
 
 
-function createCommands( document: Document ) {
-
-	const content = Array.from( { length: 30 } ).map( ( _ , i ) => `${i}th line of content...` ) ;
+function createCommands( document: Document, content:string[] ) {
 	
 	const window = new termkit.Window( {	
 		parent:  document ,
@@ -90,7 +98,7 @@ function createCommands( document: Document ) {
 		y: 1,
 		width: 50 ,
 		height: termkit.terminal.height - 2 ,
-		inputHeight: content.length  ,
+		inputHeight: termkit.terminal.height - 2,
 		title: "Commands",
 		titleHasMarkup: false ,
 		movable: false ,

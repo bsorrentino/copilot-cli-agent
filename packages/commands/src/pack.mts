@@ -3,7 +3,7 @@ import { z } from "zod";
 import path from 'node:path'
 import fs from 'node:fs/promises'
 import pc from 'picocolors'
-import { CommandTool, ExecutionContext, expandTilde, runCommand } from "copilot-cli-core";
+import { CommandTool, expandTilde, runCommand } from "copilot-cli-core";
 
 
 /**
@@ -109,10 +109,6 @@ export class PackSolutionTool extends CommandTool<typeof PackSchema> {
     description = "pack dataverse solution folder to a zip file"
     schema = PackSchema
 
-    constructor( execContext?: ExecutionContext ) {
-      super(execContext)
-    }
-
     async _call(arg: z.output<typeof PackSchema>, runManager?: CallbackManagerForToolRun): Promise<string> {
       console.debug( "Pack Solution:", arg)
       
@@ -138,6 +134,4 @@ export class PackSolutionTool extends CommandTool<typeof PackSchema> {
     }
   }
 
-const createTool = ( execContext?: ExecutionContext  ) => new PackSolutionTool( execContext )
-
-export default createTool
+export default new PackSolutionTool();

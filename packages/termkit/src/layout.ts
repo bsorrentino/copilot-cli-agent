@@ -149,9 +149,9 @@ const main = async () => {
 	}
 	const _modules = await scanFolderAndImportPackage( commandPath );
 	
+	commands.setContent( [ "system_cmd", ..._modules.map( m => m.name )] );
+	
 	const executor = await CopilotCliAgentExecutor.create( _modules, execContext );
-	
-	
 
 	function onSubmit( input: string ) {
 

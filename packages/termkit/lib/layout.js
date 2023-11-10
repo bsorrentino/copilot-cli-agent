@@ -120,6 +120,7 @@ const main = async () => {
         throw new Error("'COMMANDS_PATH' environment variable is not defined!");
     }
     const _modules = await scanFolderAndImportPackage(commandPath);
+    commands.setContent(["system_cmd", ..._modules.map(m => m.name)]);
     const executor = await CopilotCliAgentExecutor.create(_modules, execContext);
     function onSubmit(input) {
         spinner('running...', executor.run(input)
