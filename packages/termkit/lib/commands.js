@@ -65,12 +65,16 @@ export class CommandsVindow {
             }
             else {
                 this.win = createCommands(document, __classPrivateFieldGet(this, _CommandsVindow_content, "f"));
-                this.win.on("focus", (focus, type) => {
-                    // this.#log( `${focus} - ${type}`)
-                    if (!focus && type === 'select') {
-                        this.dismiss();
-                    }
+                this.win.on("clickOut", () => {
+                    __classPrivateFieldGet(this, _CommandsVindow_instances, "m", _CommandsVindow_log).call(this, `${this.win?.hasFocus}`);
+                    this.dismiss();
                 });
+                // this.win.on( "focus", ( focus:boolean , type:FocusType ) => {
+                //     this.#log( `${focus} - ${type}`)
+                // 	if( !focus && type === 'select') {
+                // 		this.dismiss()
+                // 	}
+                // })	
                 document.giveFocusTo(this.win);
             }
         });

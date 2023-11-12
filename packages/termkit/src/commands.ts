@@ -56,12 +56,16 @@ export class CommandsVindow {
 			}
 			else {
 				this.win = createCommands(document, this.#content);
-				this.win.on( "focus", ( focus:boolean , type:FocusType ) => {
-                    // this.#log( `${focus} - ${type}`)
-					if( !focus && type === 'select') {
-						this.dismiss()
-					}
-				})	
+				this.win.on( "clickOut", () => {
+                    this.#log( `${this.win?.hasFocus}`)
+					this.dismiss()
+				})
+				// this.win.on( "focus", ( focus:boolean , type:FocusType ) => {
+                //     this.#log( `${focus} - ${type}`)
+				// 	if( !focus && type === 'select') {
+				// 		this.dismiss()
+				// 	}
+				// })	
 				document.giveFocusTo( this.win )
 			}
 		})
