@@ -93,6 +93,13 @@ export class CommandsVindow {
 }
 
 
+/**
+ * Creates a new termkit Window to display command options.
+ * 
+ * @param document - The parent Document 
+ * @param content - Array of command name strings
+ * @returns The new termkit Window instance
+ */
 function createCommands( document: Document, content:string[] ) {
 	
 	const window = new termkit.Window( {	
