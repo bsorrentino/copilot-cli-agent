@@ -157,10 +157,10 @@ const loader = blessed.loading({
     hidden: true
 });
 class ExecutionContextImpl {
-    progress() {
+    startProgress(message) {
         return {
-            start: (msg) => { },
-            stop: () => { }
+            [Symbol.dispose]() {
+            }
         };
     }
     log(message, options) {

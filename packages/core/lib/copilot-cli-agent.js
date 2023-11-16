@@ -2,10 +2,12 @@ import path from 'node:path';
 import os from 'node:os';
 import { spawn } from 'node:child_process';
 import { readdir, stat, readFile } from 'node:fs/promises';
-import { StructuredTool, Tool } from 'langchain/tools';
+import { StructuredTool } from 'langchain/tools';
 import { initializeAgentExecutorWithOptions } from "langchain/agents";
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { PromptTemplate } from 'langchain/prompts';
+import { CopilotCliCallbackHandler } from './copilot-cli-callback.js';
+import { SystemCommandTool } from './system-command.js';
 /**
  * Abstract base class for command tools. Extends StructuredTool and adds an optional ExecutionContext property.
  *
@@ -72,6 +74,7 @@ export const expandTilde = (filePath) => (filePath && filePath[0] === '~') ?
  * @returns Promise resolving to the command output string.
  */
 export const runCommand = async (cmd, ctx) => {
+    const progress = ctx?.startProgress(`Running command: ${cmd}`);
     return new Promise((resolve, reject) => {
         const child = spawn(cmd, { shell: true });
         let result = "";
@@ -79,16 +82,18 @@ export const runCommand = async (cmd, ctx) => {
         child.stdout.setEncoding('utf8');
         child.stdout.on('data', data => {
             result = data.toString();
-            ctx?.log(result, { fg: 'green' });
+            ctx?.log(`^!${cmd}`);
+            ctx?.log(result);
         });
         // Read stderr
         child.stderr.setEncoding('utf8');
         child.stderr.on('data', data => {
             result = data.toString();
-            ctx?.log(result, { fg: 'red' });
+            ctx?.log(`^R${result}`);
         });
         // Handle errors
         child.on('error', error => {
+            ctx?.log(`^!${cmd}`);
             reject(error.message);
         });
         // Handle process exit
@@ -97,23 +102,6 @@ export const runCommand = async (cmd, ctx) => {
         });
     });
 };
-class SystemCommandTool extends Tool {
-    name = "system_cmd";
-    description = "all system commands";
-    execContext;
-    constructor(execContext) {
-        super();
-        this.execContext = execContext;
-    }
-    async _call(arg, runManager) {
-        // console.debug( "System Command:", arg)
-        const progress = this.execContext?.progress();
-        progress?.start(`Running command: ${arg}`);
-        const result = await runCommand(arg, this.execContext);
-        progress?.stop();
-        return `command executed: ${result}`;
-    }
-}
 export class CopilotCliAgentExecutor {
     static async create(commandModules, execContext) {
         const model = new ChatOpenAI({
@@ -123,7 +111,8 @@ export class CopilotCliAgentExecutor {
             maxConcurrency: 1,
             maxRetries: 3,
             maxTokens: 600,
-            temperature: 0
+            temperature: 0,
+            callbacks: [new CopilotCliCallbackHandler(execContext)]
         });
         const loadedTools = commandModules;
         // .map(m => m?.default)

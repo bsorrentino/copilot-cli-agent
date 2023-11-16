@@ -9,15 +9,15 @@ var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
     return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
 };
-var _CommandsVindow_instances, _CommandsVindow_content, _CommandsVindow_iter, _CommandsVindow_log;
+var _CommandsWindow_instances, _CommandsWindow_content, _CommandsWindow_iter, _CommandsWindow_log;
 import termkit from '@bsorrentino/terminal-kit';
-export class CommandsVindow {
+export class CommandsWindow {
     constructor(document) {
-        _CommandsVindow_instances.add(this);
+        _CommandsWindow_instances.add(this);
         this.document = document;
         this.win = null;
-        _CommandsVindow_content.set(this, []);
-        _CommandsVindow_iter.set(this, 1);
+        _CommandsWindow_content.set(this, []);
+        _CommandsWindow_iter.set(this, 1);
         const menuWidth = 15;
         const rowMenu = new termkit.RowMenu({
             parent: document,
@@ -64,9 +64,9 @@ export class CommandsVindow {
                 document.focusNext();
             }
             else {
-                this.win = createCommands(document, __classPrivateFieldGet(this, _CommandsVindow_content, "f"));
+                this.win = createCommands(document, __classPrivateFieldGet(this, _CommandsWindow_content, "f"));
                 this.win.on("clickOut", () => {
-                    __classPrivateFieldGet(this, _CommandsVindow_instances, "m", _CommandsVindow_log).call(this, `${this.win?.hasFocus}`);
+                    __classPrivateFieldGet(this, _CommandsWindow_instances, "m", _CommandsWindow_log).call(this, `${this.win?.hasFocus}`);
                     this.dismiss();
                 });
                 // this.win.on( "focus", ( focus:boolean , type:FocusType ) => {
@@ -86,17 +86,24 @@ export class CommandsVindow {
     setContent(content) {
         // const content1 = Array.from( { length: 30 } ).map( ( _ , i ) => `${i}th line of content...` ) ;
         // this.#log( content[0] )
-        __classPrivateFieldSet(this, _CommandsVindow_content, content, "f");
+        __classPrivateFieldSet(this, _CommandsWindow_content, content, "f");
     }
 }
-_CommandsVindow_content = new WeakMap(), _CommandsVindow_iter = new WeakMap(), _CommandsVindow_instances = new WeakSet(), _CommandsVindow_log = function _CommandsVindow_log(msg) {
+_CommandsWindow_content = new WeakMap(), _CommandsWindow_iter = new WeakMap(), _CommandsWindow_instances = new WeakSet(), _CommandsWindow_log = function _CommandsWindow_log(msg) {
     var _a, _b;
     const term = termkit.terminal;
     term.saveCursor();
-    term.moveTo.styleReset.eraseLine(2, term.height, `${msg} - ${__classPrivateFieldSet(this, _CommandsVindow_iter, (_b = __classPrivateFieldGet(this, _CommandsVindow_iter, "f"), _a = _b++, _b), "f"), _a}`);
+    term.moveTo.styleReset.eraseLine(2, term.height, `${msg} - ${__classPrivateFieldSet(this, _CommandsWindow_iter, (_b = __classPrivateFieldGet(this, _CommandsWindow_iter, "f"), _a = _b++, _b), "f"), _a}`);
     ;
     term.restoreCursor();
 };
+/**
+ * Creates a new termkit Window to display command options.
+ *
+ * @param document - The parent Document
+ * @param content - Array of command name strings
+ * @returns The new termkit Window instance
+ */
 function createCommands(document, content) {
     const window = new termkit.Window({
         parent: document,

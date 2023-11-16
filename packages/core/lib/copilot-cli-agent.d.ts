@@ -1,9 +1,5 @@
 import { StructuredTool } from 'langchain/tools';
 import { z } from 'zod';
-export interface Progress {
-    start(message: string): void;
-    stop(): void;
-}
 type Color = 'black' | 'red' | 'green' | 'yellow' | 'blue' | 'magenta' | 'cyan' | 'white';
 export type LogOptions = {
     fg: Color;
@@ -13,7 +9,7 @@ export type LogOptions = {
  * Provides logging and progress tracking capabilities.
 */
 export interface ExecutionContext {
-    progress(): Progress;
+    startProgress(message: string): Disposable;
     log(message: string, options?: Partial<LogOptions>): void;
 }
 /**

@@ -7,7 +7,6 @@ import { intro, outro, text, isCancel, spinner } from '@clack/prompts';
 import { 
   CopilotCliAgentExecutor, 
   ExecutionContext, 
-  Progress, 
   banner, 
   scanFolderAndImportPackage } from 'copilot-cli-core';
 
@@ -19,7 +18,15 @@ const execContext:ExecutionContext = {
 
   log: (msg: string) => console.log(msg) ,
 
-  progress: ():Progress => spinner()
+  startProgress: ( message: string ):Disposable => { 
+    const progress = spinner()
+    progress.start( message )
+    return { 
+      [Symbol.dispose]() {
+        progress.stop(); 
+      }
+    }
+  }
   
 }
 

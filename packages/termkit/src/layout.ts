@@ -1,7 +1,7 @@
 import 'dotenv/config'
-import termkit, { CoordsOptions, FocusType } from '@bsorrentino/terminal-kit' ;
-import { CopilotCliAgentExecutor, ExecutionContext, Progress, scanFolderAndImportPackage } from 'copilot-cli-core';
-import { CommandsVindow } from './commands.js'; 
+import termkit, { CoordsOptions, FocusType, Element } from '@bsorrentino/terminal-kit' ;
+import { CopilotCliAgentExecutor, ExecutionContext, scanFolderAndImportPackage } from 'copilot-cli-core';
+import { CommandsWindow } from './commands.js'; 
 
 const term = termkit.terminal ;
 
@@ -84,23 +84,13 @@ const output = new termkit.TextBox({
 	parent: document.elements.content,	
 	scrollable: true,
 	vScrollBar: true,
+	hScrollBar: true,
 	width: document.elements.content.outputWidth,
 	height: document.elements.content.outputHeight,
 	autoHeight: 1,
-	autoWidth: 1
+	autoWidth: 1,
+	contentHasMarkup: true
 });
-
-
-const execContext:ExecutionContext = {
-
-	log: (msg: string) => output.appendLog( msg ),
-  
-	progress: ():Progress => ({
-		start: ( msg:string ) => {},
-		stop: () => {}
-	})
-	
-}
 
 
 
@@ -139,7 +129,7 @@ prompt.on( 'parentResize' , (arg:CoordsOptions) =>  {
 	prompt.input.onParentResize()
 });
 
-const commands = new CommandsVindow( document );
+const commands = new CommandsWindow( document );
 
 const main = async () => {
 
@@ -151,19 +141,37 @@ const main = async () => {
 	
 	commands.setContent( [ "system_cmd", ..._modules.map( m => m.name )] );
 	
+	const spinner = new SpinnerElement() ;
+
+	const execContext:ExecutionContext = {
+
+		log: (msg: string) => output.appendLog( msg ),
+
+		startProgress: ( message: string ) => {	
+			spinner.setContent( message )
+			return spinner
+		}
+		
+	}
 	const executor = await CopilotCliAgentExecutor.create( _modules, execContext );
 
 	function onSubmit( input: string ) {
 
-		spinner( 'running...' , 
+		output.setContent('', true)
+		// start fix: scroll bars disappear
+		output.hasVScrollBar = true
+		output.hasHScrollBar = true
+		output.redraw( true )
+		// end fix: scroll bars disappear
 
+		spinner.startAsync( document, 1, term.height - 1, 'running...', 
 			executor.run( input )
 				.then( result => { /* execContext.log(result) */ } )
 				.catch( e => execContext.log( e ))
-				.finally( () => {
-					document.giveFocusTo( prompt );
-				})
-		);		
+				
+		).finally( () => {
+			document.giveFocusTo( prompt );
+		})	
 	}
 	
 	submit.on( 'submit' , ( ) => onSubmit( prompt.getValue() ) ) ;
@@ -175,29 +183,59 @@ const main = async () => {
 main()
 
 
+class SpinnerElement<T extends Element = Element> implements Disposable {
 
-function spinner( content: string, task: Promise<void>):void {
+	spinner:termkit.AnimatedText|null = null ;
+	text:termkit.Text|null = null;
 
-	const spinner = new termkit.AnimatedText( {
-		parent: document ,
-		animation: 'asciiSpinner' ,
-		x: 0 ,
-		y: term.height - 1,
-		attr: { bgColor: "white", color: "black" }
-	}) ;
-	const text = new termkit.Text( {
-		parent: document,
-		x: 1,
-		y: term.height - 1,
-		content: " running ...",
-		attr: { bgColor: "white", color: "black" }
-	})
-	
-	term.hideCursor(true);
-	task.finally(() => {
-		spinner.destroy();
-		text.destroy();
+	#init( parent: T, x:number, y:number, content:string ) {
+		this.spinner = new termkit.AnimatedText( {
+			parent: parent ,
+			animation: 'asciiSpinner' ,
+			x:  x,
+			y: y,
+			attr: { bgColor: "white", color: "black" }
+		}) ;
+		this.text = new termkit.Text( {
+			parent: parent,
+			x: x + 1,
+			y: y,
+			content: ` ${content}`,
+			attr: { bgColor: "white", color: "black" }
+		})
+		return this;
+	}
+
+	async startAsync( parent: T, x:number, y:number, content:string, task: Promise<void> ): Promise<void> {
+		this.start(parent, x, y, content);
+
+		return task.finally(() => {
+			this.#stop()
+		})
+	}
+
+	start( parent: T, x:number, y:number, content:string ): Disposable {
+		this.#init(parent, x, y, content)
+		term.hideCursor(true);
+		return this
+	}
+
+	setContent( content:string ) {
+		this.text?.setContent(content, true, false, true);
+	}
+
+	#stop(): void {
+		// this.text?.detach();
+		// this.spinner?.parent.attach( this.text )
+		this.text?.destroy()
+		this.spinner?.destroy();
 		term.hideCursor(false);
-	})
+		this.spinner = null
+		this.text = null
+	}
+	
+	[Symbol.dispose](): void {
+		this.#stop();
+	}
 }
 

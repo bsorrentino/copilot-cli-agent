@@ -8,7 +8,15 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const execContext = {
     log: (msg) => console.log(msg),
-    progress: () => spinner()
+    startProgress: (message) => {
+        const progress = spinner();
+        progress.start(message);
+        return {
+            [Symbol.dispose]() {
+                progress.stop();
+            }
+        };
+    }
 };
 const main = async () => {
     // const _modules = await scanFolderAndImportPackage( path.join( __dirname, 'commands') );

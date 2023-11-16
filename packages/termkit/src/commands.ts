@@ -1,7 +1,7 @@
 import termkit, { Document, FocusType } from '@bsorrentino/terminal-kit' ;
 
 
-export class CommandsVindow {
+export class CommandsWindow {
 	private win:termkit.Window|null = null
 	#content:string[] = []
 	#iter = 1
