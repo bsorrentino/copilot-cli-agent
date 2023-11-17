@@ -74,7 +74,7 @@ export const expandTilde = (filePath) => (filePath && filePath[0] === '~') ?
  * @returns Promise resolving to the command output string.
  */
 export const runCommand = async (cmd, ctx) => {
-    const progress = ctx?.startProgress(`Running command: ${cmd}`);
+    ctx?.setProgress(`Running command: ${cmd}`);
     return new Promise((resolve, reject) => {
         const child = spawn(cmd, { shell: true });
         let result = "";

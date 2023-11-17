@@ -145,14 +145,14 @@ const main = async () => {
 
 	const execContext:ExecutionContext = {
 
-		log: (msg: string) => output.appendLog( msg ),
+		log: (msg: string) => 
+			output.appendLog( msg ),
 
-		startProgress: ( message: string ) => {	
+		setProgress: ( message: string ) => 
 			spinner.setContent( message )
-			return spinner
-		}
 		
 	}
+	
 	const executor = await CopilotCliAgentExecutor.create( _modules, execContext );
 
 	function onSubmit( input: string ) {

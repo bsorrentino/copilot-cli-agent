@@ -152,13 +152,7 @@ const loader = blessed.loading({
 
 class ExecutionContextImpl implements ExecutionContext {
 
-  startProgress( message: string ): Disposable {
-
-    return { 
-      [Symbol.dispose]() {
-        
-      }
-    }
+  setProgress( message: string ): void {
   }
 
   log( message: string, options?: Partial<LogOptions> ): void {
