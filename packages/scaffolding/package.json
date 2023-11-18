@@ -6,6 +6,7 @@
   "homepage": "https://github.com/bsorrentino/copilot-cli-agent#readme",
   "license": "MIT",
   "main": "lib/scaffoldng.js",
+  "type": "module",
   "directories": {
     "lib": "lib",
     "test": "__tests__"
