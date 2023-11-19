@@ -9,6 +9,7 @@ import * as fs from 'node:fs/promises'
 const SaveFileSchema = z.object({
     name: z.string().describe("file name in Camel case"),
     content: z.string().describe(" text file content"),
+    outputPath: z.string().describe("file path").optional(),
   });
 class SaveFileTool extends StructuredTool<typeof SaveFileSchema>  {
     name ="save_file"
@@ -17,21 +18,19 @@ class SaveFileTool extends StructuredTool<typeof SaveFileSchema>  {
 
     protected async _call(arg: z.output<typeof SaveFileSchema>): Promise<string> {
         
+        const { name, content, outputPath = process.cwd() } = arg;
         // const filePath = path.join(process.cwd(), 'packages', 'commands', arg.name)
-        const filePath = path.join(process.cwd(), arg.name)
-        console.debug("save file", arg, filePath )
+        const filePath = path.join(outputPath, name)
+        // console.debug("save file", arg, filePath )
 
-        await fs.writeFile( filePath, arg.content )
+        await fs.writeFile( filePath, content )
 
-        return `file ${arg.name} saved`
-
-        // const result = await runCommand( arg, this.execContext )
-        // return `command executed: ${result}`
+        return `file ${name} saved`
 
     }
 }
 
-export const generateToolClass = async( args:{name: string, desc:string, schema: string} ) => {
+export const generateToolClass = async( args:{name: string, desc:string, schema: string, path:string} ) => {
     const promptGenerateToolTemplate =`
     As my typescript assistant 
 
@@ -41,7 +40,7 @@ export const generateToolClass = async( args:{name: string, desc:string, schema:
     DESC = {desc}
     SCHEMA = {schema}
 
-    and then copy the code below into a file named "Camel case of <NAME>".ts.
+    and then copy the code below into a file named <NAME>.mts at {path}.
 
     // beging template
     import {{ z }} from "zod";
@@ -49,13 +48,13 @@ export const generateToolClass = async( args:{name: string, desc:string, schema:
 
     <SCHEMA>;
 
-    class "Camel case of <NAME>"Tool extends CommandTool<typeof schema> {{
-        name = "snake case of <NAME>";
+    class "Camel Case of <NAME>"Tool extends CommandTool<typeof schema> {{
+        name = Snake Case of <NAME>;
         description = "<DESC>";
         schema = schema;
         
-        async _call(arg, runManager) {{
-            console.debug("executing <NAME> with arg:", arg);
+        async _call(arg: z.output<typeof schema>) {{
+            console.debug("executing '<NAME>' with arg:", arg);
             return "<NAME> executed!";
         }}
     }}

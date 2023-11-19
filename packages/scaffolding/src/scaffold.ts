@@ -3,8 +3,11 @@
 import * as p from '@clack/prompts';
 import { generateZodSchema } from "./schema-generator.js";
 import { generateToolClass } from "./tool-generation.js";
+import * as path from "node:path";
 
 async function main() {
+
+  const spinner = p.spinner();
 
   p.intro( `copilot-cli-agent: new command scaffolding` );
 
@@ -58,10 +61,19 @@ async function main() {
 
   const schemaGenerator = generateZodSchema()
 
-  let schemaCode  = await schemaGenerator.create( group.schema );
-  if( !schemaCode ) {
-    console.warn( `preoble generating a schema!`)
-    process.exit(0)
+  let schemaCode:string|null  = null;
+
+  try {
+    spinner.start('generating schema');
+    schemaCode  = await schemaGenerator.create( group.schema );
+    if( !schemaCode ) {
+      console.warn( `problem generating a schema!`)
+      process.exit(0)
+    }
+  
+  }
+  finally {
+    spinner.stop()
   }
 
   const askForconfirmSchema = async (code:string ) => 
@@ -75,9 +87,7 @@ async function main() {
       Do you confirm schema above?`,
     });
   
-    let confirmSchema = await askForconfirmSchema(schemaCode)
-
-    while( !confirmSchema ) {
+    while( !(await askForconfirmSchema(schemaCode)) ) {
 
     const schemaDescUpdatePrompt = await p.text({
       message: 'schema update',
@@ -93,16 +103,32 @@ async function main() {
         process.exit(0);
     }
 
-    schemaCode  = await schemaGenerator.update( schemaDescUpdatePrompt );
-    if( !schemaCode ) {
-      console.warn( `problem generating a schema!`)
-      process.exit(0)
+    try {
+      spinner.start( 'updating schema');
+      schemaCode  = await schemaGenerator.update( schemaDescUpdatePrompt );
+      if( !schemaCode ) {
+        console.warn( `problem generating a schema!`)
+        process.exit(0)
+      }  
     }
-
-    confirmSchema = await askForconfirmSchema(schemaCode)
+    finally {
+      spinner.stop()
+    }
   }
 
-  const tool  = await generateToolClass( { ...group, schema: schemaCode } )
+  
+
+  try {
+    spinner.start('generating tool class');
+    const tool  = await generateToolClass( { 
+      ...group, 
+      schema: schemaCode, 
+      path: path.join(process.cwd(), '..', 'commands', 'src' ) } );
+  
+  }
+  finally {
+    spinner.stop()
+  }
 
   p.outro( `copilot-cli-agent: end scaffolding` );
 }
