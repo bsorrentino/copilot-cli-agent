@@ -8,3 +8,5 @@ Download folder in home directory
 ## Pack Dataverse Solution
 * pack solution "solution" from WORKSPACES in home directory as unmanaged
 * pack solution "solution" from WORKSPACES in home directory as unmanaged.  move solution zip to "/tmp" folder
+
+

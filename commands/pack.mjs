@@ -89,9 +89,6 @@ export class PackSolutionTool extends CommandTool {
     name = "pack_solution";
     description = "pack dataverse solution folder to a zip file";
     schema = PackSchema;
-    constructor(execContext) {
-        super(execContext);
-    }
     async _call(arg, runManager) {
         console.debug("Pack Solution:", arg);
         const { solution, type } = arg;
@@ -109,5 +106,4 @@ export class PackSolutionTool extends CommandTool {
         }
     }
 }
-const createTool = (execContext) => new PackSolutionTool(execContext);
-export default createTool;
+export default new PackSolutionTool();

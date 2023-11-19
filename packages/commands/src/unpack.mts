@@ -2,7 +2,7 @@ import { CallbackManagerForToolRun } from "langchain/callbacks";
 import { z } from "zod";
 import path from 'node:path'
 
-import { CommandTool, ExecutionContext, expandTilde, runCommand } from "copilot-cli-core";
+import { CommandTool, expandTilde, runCommand } from "copilot-cli-core";
 
 /** 
  * Schema for the unpack tool arguments.
@@ -31,10 +31,6 @@ export class UnpackSolutionTool extends CommandTool<typeof UnpackSchema> {
     name = "unpack_solution"
     description = "unpack dataverse solution zip file to a folder"
     schema = UnpackSchema
-    
-    constructor( execContext?: ExecutionContext ) {
-      super(execContext)
-    }
 
     /**
      * Unpacks dataverse solution ZIP file.
@@ -60,6 +56,4 @@ export class UnpackSolutionTool extends CommandTool<typeof UnpackSchema> {
     }
   }
 
-const createTool = (execContext?: ExecutionContext) => new UnpackSolutionTool(execContext)
-
-export default createTool
+export default new UnpackSolutionTool();

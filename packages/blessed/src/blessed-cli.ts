@@ -7,7 +7,6 @@ import {
   CopilotCliAgentExecutor, 
   ExecutionContext, 
   LogOptions, 
-  Progress, 
   banner, 
   scanFolderAndImportPackage 
 } from 'copilot-cli-core';
@@ -153,12 +152,7 @@ const loader = blessed.loading({
 
 class ExecutionContextImpl implements ExecutionContext {
 
-  progress(): Progress {
-
-    return { 
-      start: (msg) => {},
-      stop: () => {}
-    }
+  setProgress( message: string ): void {
   }
 
   log( message: string, options?: Partial<LogOptions> ): void {

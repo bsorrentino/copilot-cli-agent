@@ -6,10 +6,6 @@ import { intro, outro, text, isCancel, spinner } from '@clack/prompts';
 import { CopilotCliAgentExecutor, banner, scanFolderAndImportPackage } from 'copilot-cli-core';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const execContext = {
-    log: (msg) => console.log(msg),
-    progress: () => spinner()
-};
 const main = async () => {
     // const _modules = await scanFolderAndImportPackage( path.join( __dirname, 'commands') );
     const commandPath = process.env['COMMANDS_PATH'];
@@ -17,6 +13,11 @@ const main = async () => {
         throw new Error("'COMMANDS_PATH' environment variable is not defined!");
     }
     const _modules = await scanFolderAndImportPackage(commandPath);
+    const progress = spinner();
+    const execContext = {
+        log: (msg) => console.log(msg),
+        setProgress: (message) => progress.message(message)
+    };
     const executor = await CopilotCliAgentExecutor.create(_modules, execContext);
     const _banner = await banner();
     intro(pc.green(_banner));
@@ -25,8 +26,7 @@ const main = async () => {
             message: 'Which commands would you like me to execute? ',
             placeholder: 'input prompt',
             initialValue: '',
-            validate(value) {
-            },
+            validate(value) { },
         });
         if (isCancel(input)) {
             // return cancel( p.italic('goodbye! 👋'))
@@ -34,11 +34,11 @@ const main = async () => {
             //process.exit(0)
         }
         try {
-            const result = await executor.run(input);
-            execContext.log(result);
+            progress.start();
+            await executor.run(input);
         }
-        catch (e) {
-            execContext.log(e);
+        finally {
+            progress.stop();
         }
     } while (true);
 };
