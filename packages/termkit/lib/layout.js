@@ -125,10 +125,7 @@ const main = async () => {
     const spinner = new SpinnerElement();
     const execContext = {
         log: (msg) => output.appendLog(msg),
-        startProgress: (message) => {
-            spinner.setContent(message);
-            return spinner;
-        }
+        setProgress: (message) => spinner.setContent(message)
     };
     const executor = await CopilotCliAgentExecutor.create(_modules, execContext);
     function onSubmit(input) {

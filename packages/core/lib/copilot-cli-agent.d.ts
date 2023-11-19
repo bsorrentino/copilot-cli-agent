@@ -9,7 +9,7 @@ export type LogOptions = {
  * Provides logging and progress tracking capabilities.
 */
 export interface ExecutionContext {
-    startProgress(message: string): Disposable;
+    setProgress(message: string): void;
     log(message: string, options?: Partial<LogOptions>): void;
 }
 /**

@@ -20,7 +20,7 @@ export type LogOptions = { fg: Color }
 */
 export interface ExecutionContext  {
 
-  startProgress( message: string ): Disposable;
+  setProgress( message: string ): void;
 
   log( message: string, options?: Partial<LogOptions> ): void;
 }
@@ -107,7 +107,7 @@ export const expandTilde = (filePath: string) =>
  */
 export const runCommand = async (cmd: string, ctx?: ExecutionContext) => {
   
-  const progress =  ctx?.startProgress( `Running command: ${cmd}` )
+  ctx?.setProgress( `Running command: ${cmd}` )
 
   return new Promise<string>( (resolve, reject) => {
     

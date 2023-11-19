@@ -14,23 +14,6 @@ const __filename = fileURLToPath(import.meta.url);
 
 const __dirname = path.dirname(__filename);
 
-const execContext:ExecutionContext = {
-
-  log: (msg: string) => console.log(msg) ,
-
-  startProgress: ( message: string ):Disposable => { 
-    const progress = spinner()
-    progress.start( message )
-    return { 
-      [Symbol.dispose]() {
-        progress.stop(); 
-      }
-    }
-  }
-  
-}
-
-
 const main = async () => {
 
   // const _modules = await scanFolderAndImportPackage( path.join( __dirname, 'commands') );
@@ -40,6 +23,19 @@ const main = async () => {
     throw new Error("'COMMANDS_PATH' environment variable is not defined!");
   }
   const _modules = await scanFolderAndImportPackage( commandPath );
+  
+  const progress = spinner();
+
+  const execContext:ExecutionContext = {
+
+    log: (msg: string): void => 
+      console.log(msg),
+  
+    setProgress: ( message: string ): void => 
+      progress.message( message )
+    
+  }
+  
   
   const executor = await CopilotCliAgentExecutor.create( _modules, execContext );
 
@@ -53,9 +49,7 @@ const main = async () => {
       message: 'Which commands would you like me to execute? ',
       placeholder: 'input prompt',
       initialValue: '',
-      validate(value) {
-        
-      },
+      validate(value) {},
     });
   
     if( isCancel(input) ) {
@@ -66,12 +60,12 @@ const main = async () => {
   
     try {
      
-      const result = await executor.run( input );
-      execContext.log(result);
+      progress.start();
+      await executor.run( input );
     
     }
-    catch( e:any ) {
-      execContext.log( e )
+    finally {
+      progress.stop();
     }
   
   }
