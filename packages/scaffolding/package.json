@@ -19,13 +19,14 @@
     "url": "git+https://github.com/bsorrentino/copilot-cli-agent.git"
   },
   "scripts": {
-    "test": "node ./__tests__/scaffoldng.test.js",
-    "build": "tsc"
+    "build": "tsc",
+    "test": "tsx src/scaffold.ts"
   },
   "bugs": {
     "url": "https://github.com/bsorrentino/copilot-cli-agent/issues"
   },
   "dependencies": {
+    "@clack/prompts": "^0.7.0",
     "langchain": "^0.0.178",
     "zod": "^3.22.4"
   },
@@ -33,4 +34,3 @@
     "@types/node": "^20.8.10"
   }
 }
-
