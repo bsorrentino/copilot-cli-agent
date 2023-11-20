@@ -13,6 +13,8 @@ async function main() {
 
   p.intro( pc.yellow(`Let generate new custom command 🎬` ));
 
+  
+
   const namePrompt = () => 
     p.text({
       message: pc.green('command name'),
@@ -37,17 +39,38 @@ async function main() {
     p.text({
       message: pc.green('schema description'),
       placeholder: 'meaningful description of command schema',
-      initialValue: 'properties: imagePath required, outputPath optional, grayLevel optional as enum with values 4, 8 or 16 with default value 16',
+      initialValue: 'properties: imagePath required, grayLevel optional as enum with values 4, 8 or 16 with default value 16',
       validate(value) {
         if (value.length === 0) return `Value is required!`;
       },
     });
 
+    const commandPrompt = () => {
+      
+      p.note( 
+        `
+        to describe the command use notation <arg name> to reference arguments in the schema.
+
+        It isn't supported redirect output to file
+        `, 
+        'command hints')
+      return p.text({
+        message: pc.green('command to execute'),
+        placeholder: 'shell command, use <arg> to reference arguments in the schema',
+        initialValue: 'plantuml -encodesprite <grayLevel> <imagePath>',
+        validate(value) {
+          if (value.length === 0) return `Value is required!`;
+        },
+      });
+  
+    }
+  
   const group = await p.group(
     {
       name: namePrompt,
       desc: descPrompt,
-      schema: schemaDescPrompt
+      schema: schemaDescPrompt,
+      command: commandPrompt
     },
     {
       // On Cancel callback that wraps the group
@@ -133,6 +156,10 @@ async function main() {
       schema: schemaCode, 
       path: path.join(process.cwd(), '..', 'commands', 'src' ) } );
   
+  }
+  catch( e ) {
+    console.error( e );
+    process.exit(0)
   }
   finally {
     spinner.stop()
