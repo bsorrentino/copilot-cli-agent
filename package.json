@@ -17,12 +17,12 @@
   "author": "bsorrentino <bartolomeo.sorrentino@gmail.com> (http://soulsoftware-bsc.blogspot.it/)",
   "license": "MIT",
   "dependencies": {
-    
+    "dotenv": "^16.3.1"
   },
   "devDependencies": {
     "@types/node": "^20.8.9",
     "lerna": "^7.4.2",
-    "typescript": "^5.2.2",
-    "tsx": "^3.14.0"
+    "tsx": "^3.14.0",
+    "typescript": "^5.2.2"
   }
 }

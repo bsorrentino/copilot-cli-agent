@@ -2,7 +2,8 @@ import { ChatOpenAI } from "langchain/chat_models/openai";
 import { LLMChain } from "langchain/chains";
 import { BufferMemory } from "langchain/memory";
 import { ChatPromptTemplate, MessagesPlaceholder } from "langchain/prompts";
-import { StringOutputParser } from "langchain/schema/output_parser";
+import { StringOutputParser  } from "langchain/schema/output_parser";
+import { RegexParser } from "langchain/output_parsers";
 
 
 const promptZodSchemaOneShotTemplate =`
@@ -12,6 +13,7 @@ you MUST create the typescript code for creating an object schema following the 
 // beging template
 const schema = z.object(
     // here the properties of the schema
+    ...
 );
 // end template
 
@@ -47,13 +49,13 @@ export class ZodSchemaGenerator {
 
     #parseSchemaOutput = async ( output: string ) => {
 
-        const parser = new StringOutputParser();
-        
-        const text = await parser.parse(output);
 
-        const pres = /(const schema = z.object\({.+}\);)/gms.exec( text )
+        const regexp = new RegExp(/```typescript\s*(?:import { z } from 'zod';)?\s*(.+)```/, "s" );
+        const parser = new RegexParser( regexp, ['code'], 'noContent' );
 
-        return pres ? pres[1] : null;
+        const res = await parser.parse( output );
+
+        return res.code 
 
     }
 
