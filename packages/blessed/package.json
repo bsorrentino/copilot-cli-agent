@@ -1,6 +1,6 @@
 {
   "name": "blessed-cli",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "ai copilot cli using blessed",
   "keywords": [
     "term",

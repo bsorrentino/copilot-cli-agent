@@ -1,6 +1,6 @@
 {
   "name": "cli-commands",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "cli command extensions",
   "private": true,
   "type": "module",
