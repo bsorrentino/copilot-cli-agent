@@ -9,7 +9,7 @@ async function main() {
     const namePrompt = () => p.text({
         message: pc.green('command name'),
         placeholder: 'meaningful command name',
-        initialValue: 'PlantUML Sprite Generator',
+        initialValue: '',
         validate(value) {
             if (value.length === 0)
                 return `Value is required!`;
@@ -18,7 +18,7 @@ async function main() {
     const descPrompt = () => p.text({
         message: pc.green('command description'),
         placeholder: 'meaningful command description helping AI reasoning',
-        initialValue: 'Generate a PlantUML sprite from a given image.',
+        initialValue: '',
         validate(value) {
             if (value.length === 0)
                 return `Value is required!`;
@@ -27,7 +27,7 @@ async function main() {
     const schemaDescPrompt = () => p.text({
         message: pc.green('schema description'),
         placeholder: 'meaningful description of command schema',
-        initialValue: 'properties: imagePath required, grayLevel optional as enum with values 4, 8 or 16 with default value 16',
+        initialValue: 'properties: ',
         validate(value) {
             if (value.length === 0)
                 return `Value is required!`;
@@ -42,7 +42,7 @@ async function main() {
         return p.text({
             message: pc.green('command to execute'),
             placeholder: 'shell command, use <arg> to reference arguments in the schema',
-            initialValue: 'plantuml -encodesprite <grayLevel> <imagePath>',
+            initialValue: 'echo "hello command"',
             validate(value) {
                 if (value.length === 0)
                     return `Value is required!`;

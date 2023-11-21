@@ -1,16 +1,14 @@
 import { StructuredTool } from 'langchain/tools';
 import { z } from 'zod';
-type Color = 'black' | 'red' | 'green' | 'yellow' | 'blue' | 'magenta' | 'cyan' | 'white';
-export type LogOptions = {
-    fg: Color;
-};
+export type LogAttr = 'red' | 'inverse' | 'dim';
 /**
  * Interface for execution context passed to command tools.
  * Provides logging and progress tracking capabilities.
 */
 export interface ExecutionContext {
+    verbose: boolean;
     setProgress(message: string): void;
-    log(message: string, options?: Partial<LogOptions>): void;
+    log(message: string, attr?: LogAttr): void;
 }
 /**
  * Abstract base class for command tools. Extends StructuredTool and adds an optional ExecutionContext property.
@@ -67,4 +65,3 @@ export declare class CopilotCliAgentExecutor {
     private constructor();
     run(input: string): Promise<string>;
 }
-export {};

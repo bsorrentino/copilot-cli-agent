@@ -30,8 +30,9 @@ export class CopilotCliCallbackHandler extends BaseTracer {
     // }
 
     onLLMEnd?(run: Run): void | Promise<void> {
-
-        this.excutionContext?.log( `^-onLLMEnd:\n^-^/${JSON.stringify(run.outputs)}^` )
+        if( this.excutionContext?.verbose) {
+            this.excutionContext?.log( `onLLMEnd:\n${JSON.stringify(run.outputs)}`, 'dim' )
+        }
     }
 
     // onToolStart?(run: Run): void | Promise<void> {

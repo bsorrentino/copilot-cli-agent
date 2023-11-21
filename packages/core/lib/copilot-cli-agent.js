@@ -9,6 +9,7 @@ import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { PromptTemplate } from 'langchain/prompts';
 import { CopilotCliCallbackHandler } from './copilot-cli-callback.js';
 import { SystemCommandTool } from './system-command.js';
+;
 /**
  * Abstract base class for command tools. Extends StructuredTool and adds an optional ExecutionContext property.
  *
@@ -89,14 +90,24 @@ export const runCommand = async (arg, ctx) => {
         if (options.out) {
             const output = fs.createWriteStream(options.out);
             child.stdout.pipe(output);
-            ctx?.log(`^!${options.cmd} > ${options.out}`);
+            if (ctx?.verbose) {
+                ctx?.log(`${options.cmd} > ${options.out}`, 'inverse');
+            }
+            else {
+                ctx?.log('');
+            }
         }
         else {
             // Read stdout
             child.stdout.setEncoding('utf8');
             child.stdout.on('data', data => {
                 result = data.toString();
-                ctx?.log(`^!${options.cmd}`);
+                if (ctx?.verbose) {
+                    ctx?.log(options.cmd, 'inverse');
+                }
+                else {
+                    ctx?.log('');
+                }
                 ctx?.log(result);
             });
         }
@@ -109,12 +120,12 @@ export const runCommand = async (arg, ctx) => {
             child.stderr.setEncoding('utf8');
             child.stderr.on('data', data => {
                 result = data.toString();
-                ctx?.log(`^R${result}`);
+                ctx?.log(result, 'red');
             });
         }
         // Handle errors
         child.on('error', error => {
-            ctx?.log(`^!${options.cmd}`);
+            ctx?.log(options.cmd, 'red');
             reject(error.message);
         });
         // Handle process exit

@@ -6,8 +6,7 @@ import path from 'node:path'
 import { 
   CopilotCliAgentExecutor, 
   ExecutionContext, 
-  LogOptions, 
-  banner, 
+  LogAttr,  
   scanFolderAndImportPackage 
 } from 'copilot-cli-core';
 
@@ -152,10 +151,12 @@ const loader = blessed.loading({
 
 class ExecutionContextImpl implements ExecutionContext {
 
+  constructor( public verbose = false ) {}
+
   setProgress( message: string ): void {
   }
 
-  log( message: string, options?: Partial<LogOptions> ): void {
+  log( message: string, attr?: LogAttr ): void {
     logger.log(message) 
   }
   

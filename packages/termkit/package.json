@@ -1,6 +1,6 @@
 {
   "name": "termkit-cli",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "terminal-kit copilot cli implementation ",
   "type": "module",
   "keywords": [

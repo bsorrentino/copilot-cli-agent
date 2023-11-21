@@ -1,6 +1,6 @@
 {
-  "name": "copilot-cli-scaffolding",
-  "version": "1.2.0",
+  "name": "copilot-cli-scaffold",
+  "version": "1.2.1",
   "description": "tool to scaffold a custom cli command",
   "author": "bsorrentino <bartolomeo.sorrentino@gmail.com> (http://soulsoftware-bsc.blogspot.it/)",
   "homepage": "https://github.com/bsorrentino/copilot-cli-agent#readme",
@@ -20,7 +20,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "tsx src/scaffold.ts"
+    "test": "tsx src/scaffold.ts",
+    "start": "node lib/scaffold.js dotenv_config_path=../../.env"
   },
   "bugs": {
     "url": "https://github.com/bsorrentino/copilot-cli-agent/issues"
