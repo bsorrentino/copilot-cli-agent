@@ -8,10 +8,11 @@
   ],
   "scripts": {
     "build": "npm run build --workspaces",
-    "blessed:build": "tsc",
-    "simple:run": "npm run start -w simple-cli",
+    "simple:start": "npm run start -w simple-cli",
     "termkit:build": "npm run build -w termkit-cli",
-    "termkit:start": "npm run start -w termkit-cli"
+    "termkit:start": "npm run start -w termkit-cli",
+    "scaffold:build": "npm run build -w copilot-cli-scaffold",
+    "scaffold:start": "npm run start -w copilot-cli-scaffold"
   },
   "keywords": [],
   "author": "bsorrentino <bartolomeo.sorrentino@gmail.com> (http://soulsoftware-bsc.blogspot.it/)",
