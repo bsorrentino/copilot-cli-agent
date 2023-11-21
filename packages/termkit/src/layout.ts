@@ -2,6 +2,7 @@ import 'dotenv/config'
 import termkit, { CoordsOptions, FocusType, Element } from '@bsorrentino/terminal-kit' ;
 import { CopilotCliAgentExecutor, ExecutionContext, scanFolderAndImportPackage } from 'copilot-cli-core';
 import { CommandsWindow } from './commands.js'; 
+import fs from 'node:fs/promises';
 
 const term = termkit.terminal ;
 
@@ -133,6 +134,8 @@ const commands = new CommandsWindow( document );
 
 const main = async () => {
 
+	const logger = await fs.open('./log.txt', 'a+')
+
 	const commandPath = process.env['COMMANDS_PATH'];
 	if(!commandPath ) {
 	  throw new Error("'COMMANDS_PATH' environment variable is not defined!");
@@ -148,8 +151,10 @@ const main = async () => {
 		log: (msg: string) => 
 			output.appendLog( msg ),
 
-		setProgress: ( message: string ) => 
-			spinner.setContent( message )
+		setProgress: ( msg: string ) => {
+			spinner.setContent( msg )
+			logger.appendFile( `${msg}\n` )
+		}
 		
 	}
 	
