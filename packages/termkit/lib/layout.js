@@ -126,7 +126,21 @@ const main = async () => {
     commands.setContent(["system_cmd", ..._modules.map(m => m.name)]);
     const spinner = new SpinnerElement();
     const execContext = {
-        log: (msg) => output.appendLog(msg),
+        verbose: true,
+        log: (msg, attr) => {
+            switch (attr) {
+                case 'red':
+                    msg = `^R${msg}`;
+                    break;
+                case 'inverse':
+                    msg = `^!${msg}`;
+                    break;
+                case 'dim':
+                    msg = `^-${msg}`;
+                    break;
+            }
+            output.appendLog(msg);
+        },
         setProgress: (msg) => {
             spinner.setContent(msg);
             logger.appendFile(`${msg}\n`);

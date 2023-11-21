@@ -15,8 +15,22 @@ const main = async () => {
     const _modules = await scanFolderAndImportPackage(commandPath);
     const progress = spinner();
     const execContext = {
-        log: (msg) => console.log(msg),
-        setProgress: (message) => progress.message(message)
+        verbose: false,
+        log: (msg, attr) => {
+            switch (attr) {
+                case 'red':
+                    msg = pc.red(msg);
+                    break;
+                case 'inverse':
+                    msg = pc.inverse(msg);
+                    break;
+                case 'dim':
+                    msg = pc.dim(msg);
+                    break;
+            }
+            console.log(msg);
+        },
+        setProgress: (message) => progress.message(message),
     };
     const executor = await CopilotCliAgentExecutor.create(_modules, execContext);
     const _banner = await banner();

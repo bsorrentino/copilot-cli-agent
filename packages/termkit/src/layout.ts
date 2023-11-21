@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import termkit, { CoordsOptions, FocusType, Element } from '@bsorrentino/terminal-kit' ;
-import { CopilotCliAgentExecutor, ExecutionContext, scanFolderAndImportPackage } from 'copilot-cli-core';
+import { CopilotCliAgentExecutor, ExecutionContext, LogAttr, scanFolderAndImportPackage } from 'copilot-cli-core';
 import { CommandsWindow } from './commands.js'; 
 import fs from 'node:fs/promises';
 
@@ -147,9 +147,21 @@ const main = async () => {
 	const spinner = new SpinnerElement() ;
 
 	const execContext:ExecutionContext = {
-
-		log: (msg: string) => 
-			output.appendLog( msg ),
+		verbose: true,
+		log: (msg: string, attr?: LogAttr) => {
+			switch(attr) {
+				case 'red':
+					msg = `^R${msg}`;
+					break;
+				case 'inverse':
+					msg = `^!${msg}`;
+					break;
+				case 'dim':
+					msg = `^-${msg}`;
+					break;
+			}
+			output.appendLog( msg )
+		},
 
 		setProgress: ( msg: string ) => {
 			spinner.setContent( msg )

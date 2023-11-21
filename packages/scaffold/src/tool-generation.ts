@@ -20,7 +20,8 @@ class SaveFileTool extends StructuredTool<typeof SaveFileSchema>  {
         
         const { name, content, outputPath = process.cwd() } = arg;
 
-        const fileName = name
+        const fileName = path.extname(name) === '' ? name + '.mts': name
+
         // const filePath = path.join(process.cwd(), 'packages', 'commands', arg.name)
         const filePath = path.join(outputPath, fileName)
         // console.debug("save file", arg, filePath )
@@ -62,10 +63,9 @@ const promptGenerateToolTemplateWithCommand =`
       schema = schema;
       
       async _call(arg: z.output<typeof schema>) {{
-          console.debug("executing '<NAME>' with arg:", arg);
 
-          await runCommand( <command>, this.execContext )
-          return "<NAME> executed!";
+          const res = await runCommand( <command>, this.execContext )
+          return this.name +  'completed ' + res;
       }}
   }}
   export default new "Camel case of <NAME>"Tool();

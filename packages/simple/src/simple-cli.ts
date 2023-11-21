@@ -7,8 +7,10 @@ import { intro, outro, text, isCancel, spinner } from '@clack/prompts';
 import { 
   CopilotCliAgentExecutor, 
   ExecutionContext, 
+  LogAttr, 
   banner, 
-  scanFolderAndImportPackage } from 'copilot-cli-core';
+  scanFolderAndImportPackage
+} from 'copilot-cli-core';
 
 const __filename = fileURLToPath(import.meta.url);
 
@@ -27,15 +29,27 @@ const main = async () => {
   const progress = spinner();
 
   const execContext:ExecutionContext = {
+    verbose: false,
 
-    log: (msg: string): void => 
-      console.log(msg),
-  
-    setProgress: ( message: string ): void => 
-      progress.message( message )
+    log: (msg: string, attr?: LogAttr): void => {
+      switch(attr) {
+				case 'red':
+					msg = pc.red(msg);
+					break;
+				case 'inverse':
+					msg = pc.inverse(msg);
+					break;
+        case 'dim':
+          msg = pc.dim(msg);
+          break;
+    
+			}
+      console.log(msg)
+    },
+
+    setProgress: (message: string): void => progress.message(message),
     
   }
-  
   
   const executor = await CopilotCliAgentExecutor.create( _modules, execContext );
 
