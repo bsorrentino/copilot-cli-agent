@@ -1,5 +1,6 @@
 import path from 'node:path'
 import os from 'node:os'
+import fs from 'node:fs'
 import { spawn } from 'node:child_process';
 import { readdir, stat, readFile } from 'node:fs/promises'
 import { StructuredTool } from 'langchain/tools';
@@ -10,7 +11,7 @@ import { PromptTemplate } from 'langchain/prompts';
 import { CopilotCliCallbackHandler } from './copilot-cli-callback.js';
 import { SystemCommandTool } from './system-command.js';
 
-type Color = 'black' |'red' | 'green' | 'yellow' | 'blue' |'magenta' | 'cyan' | 'white';
+type Color = 'black' | 'red' | 'green' | 'yellow' | 'blue' | 'magenta' | 'cyan' | 'white';
 
 export type LogOptions = { fg: Color }
 
@@ -18,11 +19,11 @@ export type LogOptions = { fg: Color }
  * Interface for execution context passed to command tools. 
  * Provides logging and progress tracking capabilities.
 */
-export interface ExecutionContext  {
+export interface ExecutionContext {
 
-  setProgress( message: string ): void;
+  setProgress(message: string): void;
 
-  log( message: string, options?: Partial<LogOptions> ): void;
+  log(message: string, options?: Partial<LogOptions>): void;
 }
 
 /**
@@ -32,10 +33,10 @@ export interface ExecutionContext  {
  * _call method to handle execution. The ExecutionContext allows them to access logging and other context services.
 */
 export abstract class CommandTool<T extends z.ZodObject<any, any, any, any>> extends StructuredTool<T> {
-  
+
   protected execContext?: ExecutionContext;
 
-  setExecutionContext( execContext?: ExecutionContext ) {
+  setExecutionContext(execContext?: ExecutionContext) {
     this.execContext = execContext
   }
 }
@@ -50,8 +51,8 @@ export abstract class CommandTool<T extends z.ZodObject<any, any, any, any>> ext
  * @returns A promise resolving to the banner text string.
  * @link [patorjk's ASCII Art Generator](http://patorjk.com/software/taag/#p=testall&f=PsY2&t=AI%20powered%20CLI%0A)
  */
-export const banner = async (dirname?: string) => 
-  await readFile(path.join( dirname ?? '', 'banner.txt'), 'utf8');
+export const banner = async (dirname?: string) =>
+  await readFile(path.join(dirname ?? '', 'banner.txt'), 'utf8');
 
 /**
  * Recursively scans the provided folder path and dynamically imports all JavaScript modules found.
@@ -68,7 +69,7 @@ export const scanFolderAndImportPackage = async (folderPath: string): Promise<Co
   // Check if directory exists
   const stats = await stat(folderPath);
   if (!stats.isDirectory()) {
-      throw new Error('Provided path either does not exist or is not a directory.');
+    throw new Error('Provided path either does not exist or is not a directory.');
   }
 
   // Read directory
@@ -76,13 +77,13 @@ export const scanFolderAndImportPackage = async (folderPath: string): Promise<Co
 
   // Filter only .js files and dynamically require them
   const modules = files
-      .filter(file => path.extname(file) === '.mjs')
-      .map(file => import(path.join(folderPath, file)));
-  
-  const result = Promise.all(modules).then( _modules => 
-      _modules
-          .map(m => m?.default)
-          .filter(m => m instanceof CommandTool)
+    .filter(file => path.extname(file) === '.mjs')
+    .map(file => import(path.join(folderPath, file)));
+
+  const result = Promise.all(modules).then(_modules =>
+    _modules
+      .map(m => m?.default)
+      .filter(m => m instanceof CommandTool)
   );
 
   return result;
@@ -95,9 +96,11 @@ export const scanFolderAndImportPackage = async (folderPath: string): Promise<Co
  * @returns The expanded file path with the tilde replaced by the home directory.
  */
 export const expandTilde = (filePath: string) =>
-  ( filePath && filePath[0] === '~') ?
+  (filePath && filePath[0] === '~') ?
     path.join(os.homedir(), filePath.slice(1)) : filePath
-  
+
+
+export type RunCommandArg = { cmd: string, out?: string, err?: string }
 /**
  * Runs a shell command and returns the output.
  * 
@@ -105,105 +108,127 @@ export const expandTilde = (filePath: string) =>
  * @param ctx - Optional execution context for logging output. 
  * @returns Promise resolving to the command output string.
  */
-export const runCommand = async (cmd: string, ctx?: ExecutionContext) => {
-  
-  ctx?.setProgress( `Running command: ${cmd}` )
+export const runCommand = async (arg: RunCommandArg | string, ctx?: ExecutionContext): Promise<string> => {
 
-  return new Promise<string>( (resolve, reject) => {
-    
-    const child =  spawn(cmd, { shell:true }) 
+  let options: RunCommandArg
 
-    let result = ""
+  if (typeof arg === 'string') {
+    options = { cmd: arg };
+  } else {
+    options = arg
+  }
 
-    // Read stdout
-    child.stdout.setEncoding('utf8')
-    child.stdout.on('data', data => {
-      result = data.toString()
-      ctx?.log( `^!${cmd}`)
-      ctx?.log( result ) 
-    });
+  return new Promise<string>((resolve, reject) => {
 
-    // Read stderr
-    child.stderr.setEncoding('utf8')
-    child.stderr.on('data', data => {
-      result = data.toString()
-      ctx?.log( `^R${result}`) ;
-    })
+    ctx?.setProgress(`Running command: ${options.cmd}`)
+
+    const child = spawn(options.cmd, { stdio: ['inherit', 'pipe', 'pipe'], shell: true })
+
+    let result = ''
+
+    if (options.out) {
+      const output = fs.createWriteStream(options.out);
+      child.stdout.pipe(output);
+      ctx?.log( `^!${options.cmd} > ${options.out}`);
+    }
+    else {
+      // Read stdout
+      child.stdout.setEncoding('utf8')
+      child.stdout.on('data', data => {
+        result = data.toString();
+        ctx?.log( `^!${options.cmd}`)
+        ctx?.log( result ) 
+      
+      });
+    }
+
+    if (options.err) {
+      const output = fs.createWriteStream(options.err);
+      child.stderr.pipe(output);
+    }
+    else {
+      // Read stderr
+      child.stderr.setEncoding('utf8')
+      child.stderr.on('data', data => {
+        result = data.toString()
+        ctx?.log(`^R${result}`);
+      })
+    }
 
     // Handle errors
     child.on('error', error => {
-      ctx?.log( `^!${cmd}`)
-      reject(error.message) 
-      
+      ctx?.log(`^!${options.cmd}`)
+      reject(error.message)
+
     })
 
     // Handle process exit
-    child.on('close', code => { 
-      resolve(result) 
-    });
+    child.on('close', code => {
+      resolve(result)
+    })
 
   })
 }
 
-  export class CopilotCliAgentExecutor {
+export class CopilotCliAgentExecutor {
 
-    public static async create( commandModules: CommandTool<any>[], execContext?: ExecutionContext): Promise<CopilotCliAgentExecutor> {
-  
-      const model = new ChatOpenAI({
-        // modelName: "gpt-4",
-        modelName: "gpt-3.5-turbo-0613",
-        // stop: ["end", "stop", "quit"],
-        maxConcurrency: 1,
-        maxRetries: 3,
-        maxTokens: 600,
-        temperature: 0,
-        callbacks: [ new CopilotCliCallbackHandler(execContext) ]
-      });
-  
-      const loadedTools = commandModules
-        // .map(m => m?.default)
-        // .filter(m => m instanceof CommandTool)
-        // //.filter(m => m && m.name && m.description && m.schema)
-        // .map(m => m.setExecutionContext(execContext))
-  
-      const tools = [
-        new SystemCommandTool(execContext),
-        ...loadedTools
-      ];
-  
-      const agent = await initializeAgentExecutorWithOptions(tools, model, {
-        agentType: "openai-functions",
-        verbose: false,
-        handleParsingErrors: (e) => {
-  
-          execContext?.log(`HANDLE ERROR ${e}`);
-          return "there is an error!"
-        }
-      });
-  
-      return new CopilotCliAgentExecutor(agent);
-    }
-  
-    private agent: AgentExecutor;
-  
-    private mainPromptTemplate = PromptTemplate.fromTemplate(
-      `You are my command line executor assistant. 
+  public static async create(commandModules: CommandTool<any>[], execContext?: ExecutionContext): Promise<CopilotCliAgentExecutor> {
+
+    const model = new ChatOpenAI({
+      // modelName: "gpt-4",
+      modelName: "gpt-3.5-turbo-0613",
+      // stop: ["end", "stop", "quit"],
+      maxConcurrency: 1,
+      maxRetries: 3,
+      maxTokens: 600,
+      temperature: 0,
+      callbacks: [new CopilotCliCallbackHandler(execContext)]
+    });
+
+    commandModules.forEach( m => m.setExecutionContext(execContext));
+    
+    // .map(m => m?.default)
+    // .filter(m => m instanceof CommandTool)
+    // //.filter(m => m && m.name && m.description && m.schema)
+    // .map(m => m.setExecutionContext(execContext))
+
+    const tools = [
+      new SystemCommandTool(execContext),
+      ...commandModules
+    ];
+
+    const agent = await initializeAgentExecutorWithOptions(tools, model, {
+      agentType: "openai-functions",
+      verbose: false,
+      handleParsingErrors: (e) => {
+
+        execContext?.log(`HANDLE ERROR ${e}`);
+        return "there is an error!"
+      }
+    });
+
+    return new CopilotCliAgentExecutor(agent);
+  }
+
+  private agent: AgentExecutor;
+
+  private mainPromptTemplate = PromptTemplate.fromTemplate(
+    `You are my command line executor assistant. 
       Limit your response to the word 'completed' and assume that we are on {platform} operative system:
   
       {input}`
-    );
-  
-    private constructor(agent: AgentExecutor) {
-      this.agent = agent;
-    }
-  
-    public async run(input: string) {
-  
-      const prompt = await this.mainPromptTemplate.format({ platform: os.platform(), input: input })
-      const result = await this.agent.run(prompt);
-      return result;
-    }
-  
-  
+  );
+
+  private constructor(agent: AgentExecutor) {
+    this.agent = agent;
   }
-  
+
+  public async run(input: string) {
+
+    const prompt = await this.mainPromptTemplate.format({ platform: os.platform(), input: input })
+    const result = await this.agent.run(prompt);
+    return result;
+  }
+
+
+}
