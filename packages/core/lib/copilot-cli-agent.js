@@ -1,5 +1,6 @@
 import path from 'node:path';
 import os from 'node:os';
+import fs from 'node:fs';
 import { spawn } from 'node:child_process';
 import { readdir, stat, readFile } from 'node:fs/promises';
 import { StructuredTool } from 'langchain/tools';
@@ -73,27 +74,47 @@ export const expandTilde = (filePath) => (filePath && filePath[0] === '~') ?
  * @param ctx - Optional execution context for logging output.
  * @returns Promise resolving to the command output string.
  */
-export const runCommand = async (cmd, ctx) => {
-    ctx?.setProgress(`Running command: ${cmd}`);
+export const runCommand = async (arg, ctx) => {
+    let options;
+    if (typeof arg === 'string') {
+        options = { cmd: arg };
+    }
+    else {
+        options = arg;
+    }
     return new Promise((resolve, reject) => {
-        const child = spawn(cmd, { shell: true });
-        let result = "";
-        // Read stdout
-        child.stdout.setEncoding('utf8');
-        child.stdout.on('data', data => {
-            result = data.toString();
-            ctx?.log(`^!${cmd}`);
-            ctx?.log(result);
-        });
-        // Read stderr
-        child.stderr.setEncoding('utf8');
-        child.stderr.on('data', data => {
-            result = data.toString();
-            ctx?.log(`^R${result}`);
-        });
+        ctx?.setProgress(`Running command: ${options.cmd}`);
+        const child = spawn(options.cmd, { stdio: ['inherit', 'pipe', 'pipe'], shell: true });
+        let result = '';
+        if (options.out) {
+            const output = fs.createWriteStream(options.out);
+            child.stdout.pipe(output);
+            ctx?.log(`^!${options.cmd} > ${options.out}`);
+        }
+        else {
+            // Read stdout
+            child.stdout.setEncoding('utf8');
+            child.stdout.on('data', data => {
+                result = data.toString();
+                ctx?.log(`^!${options.cmd}`);
+                ctx?.log(result);
+            });
+        }
+        if (options.err) {
+            const output = fs.createWriteStream(options.err);
+            child.stderr.pipe(output);
+        }
+        else {
+            // Read stderr
+            child.stderr.setEncoding('utf8');
+            child.stderr.on('data', data => {
+                result = data.toString();
+                ctx?.log(`^R${result}`);
+            });
+        }
         // Handle errors
         child.on('error', error => {
-            ctx?.log(`^!${cmd}`);
+            ctx?.log(`^!${options.cmd}`);
             reject(error.message);
         });
         // Handle process exit
@@ -114,14 +135,14 @@ export class CopilotCliAgentExecutor {
             temperature: 0,
             callbacks: [new CopilotCliCallbackHandler(execContext)]
         });
-        const loadedTools = commandModules;
+        commandModules.forEach(m => m.setExecutionContext(execContext));
         // .map(m => m?.default)
         // .filter(m => m instanceof CommandTool)
         // //.filter(m => m && m.name && m.description && m.schema)
         // .map(m => m.setExecutionContext(execContext))
         const tools = [
             new SystemCommandTool(execContext),
-            ...loadedTools
+            ...commandModules
         ];
         const agent = await initializeAgentExecutorWithOptions(tools, model, {
             agentType: "openai-functions",

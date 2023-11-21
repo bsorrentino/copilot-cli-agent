@@ -47,6 +47,11 @@ export declare const scanFolderAndImportPackage: (folderPath: string) => Promise
  * @returns The expanded file path with the tilde replaced by the home directory.
  */
 export declare const expandTilde: (filePath: string) => string;
+export type RunCommandArg = {
+    cmd: string;
+    out?: string;
+    err?: string;
+};
 /**
  * Runs a shell command and returns the output.
  *
@@ -54,7 +59,7 @@ export declare const expandTilde: (filePath: string) => string;
  * @param ctx - Optional execution context for logging output.
  * @returns Promise resolving to the command output string.
  */
-export declare const runCommand: (cmd: string, ctx?: ExecutionContext) => Promise<string>;
+export declare const runCommand: (arg: RunCommandArg | string, ctx?: ExecutionContext) => Promise<string>;
 export declare class CopilotCliAgentExecutor {
     static create(commandModules: CommandTool<any>[], execContext?: ExecutionContext): Promise<CopilotCliAgentExecutor>;
     private agent;

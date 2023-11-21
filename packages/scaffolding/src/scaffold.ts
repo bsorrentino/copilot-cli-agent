@@ -1,6 +1,8 @@
 
 
 import * as p from '@clack/prompts';
+import pc from 'picocolors'
+
 import { generateZodSchema } from "./schema-generator.js";
 import { generateToolClass } from "./tool-generation.js";
 import * as path from "node:path";
@@ -9,11 +11,13 @@ async function main() {
 
   const spinner = p.spinner();
 
-  p.intro( `copilot-cli-agent: new command scaffolding` );
+  p.intro( pc.yellow(`Let generate new custom command 🎬` ));
+
+  
 
   const namePrompt = () => 
     p.text({
-      message: 'command name',
+      message: pc.green('command name'),
       placeholder: 'meaningful command name',
       initialValue: 'PlantUML Sprite Generator',
       validate(value) {
@@ -23,7 +27,7 @@ async function main() {
 
   const descPrompt = () => 
     p.text({
-      message: 'command description',
+      message: pc.green('command description'),
       placeholder: 'meaningful command description helping AI reasoning',
       initialValue: 'Generate a PlantUML sprite from a given image.',
       validate(value) {
@@ -33,19 +37,40 @@ async function main() {
 
     const schemaDescPrompt = () => 
     p.text({
-      message: 'schema description',
+      message: pc.green('schema description'),
       placeholder: 'meaningful description of command schema',
-      initialValue: 'properties: imagePath required, outputPath optional, grayLevel optional as enum with values 4, 8 or 16 with default value 16',
+      initialValue: 'properties: imagePath required, grayLevel optional as enum with values 4, 8 or 16 with default value 16',
       validate(value) {
         if (value.length === 0) return `Value is required!`;
       },
     });
 
+    const commandPrompt = () => {
+      
+      p.note( 
+        `
+        to describe the command use notation <arg name> to reference arguments in the schema.
+
+        It isn't supported redirect output to file
+        `, 
+        'command hints')
+      return p.text({
+        message: pc.green('command to execute'),
+        placeholder: 'shell command, use <arg> to reference arguments in the schema',
+        initialValue: 'plantuml -encodesprite <grayLevel> <imagePath>',
+        validate(value) {
+          if (value.length === 0) return `Value is required!`;
+        },
+      });
+  
+    }
+  
   const group = await p.group(
     {
       name: namePrompt,
       desc: descPrompt,
-      schema: schemaDescPrompt
+      schema: schemaDescPrompt,
+      command: commandPrompt
     },
     {
       // On Cancel callback that wraps the group
@@ -57,14 +82,14 @@ async function main() {
     }
   );
   
-  console.log(group.name, group.desc );
+  // console.debug(group.name, group.desc );
 
   const schemaGenerator = generateZodSchema()
 
   let schemaCode:string|null  = null;
 
   try {
-    spinner.start('generating schema');
+    spinner.start( pc.magenta('generating schema') );
     schemaCode  = await schemaGenerator.create( group.schema );
     if( !schemaCode ) {
       console.warn( `problem generating a schema!`)
@@ -79,58 +104,69 @@ async function main() {
   const askForconfirmSchema = async (code:string ) => 
     await p.confirm({
       message:
-       `zod schema:
+       `${pc.underline('zod schema')}:
   
+       ${pc.italic(code)}
   
-       ${code}
-  
-      Do you confirm schema above?`,
+      ${pc.green('Do you confirm schema above?')}`,
     });
   
-    while( !(await askForconfirmSchema(schemaCode)) ) {
+    let schemaConfirm: boolean | symbol = false;
 
-    const schemaDescUpdatePrompt = await p.text({
-      message: 'schema update',
-      placeholder: 'describe updates to the schema',
-      initialValue: '',
-      validate(value) {
-        if (value.length === 0) return `Value is required!`;
-      },
-    });
+    while( !(schemaConfirm = await askForconfirmSchema(schemaCode)) ) {
 
-    if( p.isCancel(schemaDescUpdatePrompt) ) {
-        p.cancel('Operation cancelled.');
-        process.exit(0);
+      const schemaDescUpdatePrompt = await p.text({
+        message: pc.green('schema update'),
+        placeholder: 'describe updates to the schema',
+        initialValue: '',
+        validate(value) {
+          if (value.length === 0) return `Value is required!`;
+        },
+      });
+
+      if( p.isCancel(schemaDescUpdatePrompt) ) {
+          p.cancel('Operation cancelled.');
+          process.exit(0);
+      }
+
+      try {
+        spinner.start( pc.magenta('updating schema') );
+        schemaCode  = await schemaGenerator.update( schemaDescUpdatePrompt );
+        if( !schemaCode ) {
+          console.warn( `problem generating a schema!`)
+          process.exit(0)
+        }  
+      }
+      finally {
+        spinner.stop()
+      }
     }
 
-    try {
-      spinner.start( 'updating schema');
-      schemaCode  = await schemaGenerator.update( schemaDescUpdatePrompt );
-      if( !schemaCode ) {
-        console.warn( `problem generating a schema!`)
-        process.exit(0)
-      }  
-    }
-    finally {
-      spinner.stop()
-    }
+  if( p.isCancel(schemaConfirm) ) {
+    p.cancel('Operation cancelled.');
+    process.exit(0);
   }
 
-  
 
   try {
-    spinner.start('generating tool class');
+    spinner.start( pc.magenta('generating tool class') );
+
     const tool  = await generateToolClass( { 
       ...group, 
       schema: schemaCode, 
       path: path.join(process.cwd(), '..', 'commands', 'src' ) } );
   
   }
+  catch( e ) {
+    console.error( e );
+    process.exit(0)
+  }
   finally {
     spinner.stop()
   }
 
-  p.outro( `copilot-cli-agent: end scaffolding` );
+    p.outro( pc.yellow(`Command generated! bye 👋` ));
+
 }
 
 
