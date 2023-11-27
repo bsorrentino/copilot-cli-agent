@@ -3,7 +3,7 @@
 import * as p from '@clack/prompts';
 import pc from 'picocolors'
 
-import { generateZodSchema } from "./schema-generator.js";
+import { ZodSchemaGenerator, generateZodSchema } from "./schema-generator.js";
 import { generateToolClass } from "./tool-generation.js";
 import * as path from "node:path";
 
@@ -12,8 +12,6 @@ async function main() {
   const spinner = p.spinner();
 
   p.intro( pc.yellow(`Let generate new custom command 🎬` ));
-
-  
 
   const namePrompt = () => 
     p.text({
@@ -84,18 +82,23 @@ async function main() {
   
   // console.debug(group.name, group.desc );
 
-  const schemaGenerator = generateZodSchema()
-
   let schemaCode:string|null  = null;
 
+  let schemaGenerator:ZodSchemaGenerator
+
   try {
+    schemaGenerator = generateZodSchema()
+
     spinner.start( pc.magenta('generating schema') );
     schemaCode  = await schemaGenerator.create( group.schema );
     if( !schemaCode ) {
       console.warn( `problem generating a schema!`)
       process.exit(0)
     }
-  
+  }
+  catch( e ) {
+    console.error( 'schema generation error', e );
+    process.exit(0)
   }
   finally {
     spinner.stop()
@@ -147,7 +150,6 @@ async function main() {
     process.exit(0);
   }
 
-
   try {
     spinner.start( pc.magenta('generating tool class') );
 
@@ -168,7 +170,5 @@ async function main() {
     p.outro( pc.yellow(`Command generated! bye 👋` ));
 
 }
-
-
 
 main();

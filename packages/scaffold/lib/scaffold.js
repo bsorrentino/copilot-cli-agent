@@ -63,15 +63,20 @@ async function main() {
         },
     });
     // console.debug(group.name, group.desc );
-    const schemaGenerator = generateZodSchema();
     let schemaCode = null;
+    let schemaGenerator;
     try {
+        schemaGenerator = generateZodSchema();
         spinner.start(pc.magenta('generating schema'));
         schemaCode = await schemaGenerator.create(group.schema);
         if (!schemaCode) {
             console.warn(`problem generating a schema!`);
             process.exit(0);
         }
+    }
+    catch (e) {
+        console.error('schema generation error', e);
+        process.exit(0);
     }
     finally {
         spinner.stop();
