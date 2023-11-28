@@ -10,6 +10,7 @@ import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { PromptTemplate } from 'langchain/prompts';
 import { CopilotCliCallbackHandler } from './copilot-cli-callback.js';
 import { SystemCommandTool } from './system-command.js';
+import { ListCommandsCommandTool } from './list-commands-command.js';
 
 export type LogAttr = 'red' | 'inverse' | 'dim'; ;
 
@@ -204,6 +205,7 @@ export class CopilotCliAgentExecutor {
 
     const tools = [
       new SystemCommandTool(execContext),
+      new ListCommandsCommandTool(commandModules, execContext),
       ...commandModules
     ];
 

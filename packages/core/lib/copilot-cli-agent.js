@@ -9,6 +9,7 @@ import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { PromptTemplate } from 'langchain/prompts';
 import { CopilotCliCallbackHandler } from './copilot-cli-callback.js';
 import { SystemCommandTool } from './system-command.js';
+import { ListCommandsCommandTool } from './list-commands-command.js';
 ;
 /**
  * Abstract base class for command tools. Extends StructuredTool and adds an optional ExecutionContext property.
@@ -153,6 +154,7 @@ export class CopilotCliAgentExecutor {
         // .map(m => m.setExecutionContext(execContext))
         const tools = [
             new SystemCommandTool(execContext),
+            new ListCommandsCommandTool(commandModules, execContext),
             ...commandModules
         ];
         const agent = await initializeAgentExecutorWithOptions(tools, model, {
