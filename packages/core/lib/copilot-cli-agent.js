@@ -166,10 +166,10 @@ export class CopilotCliAgentExecutor {
         return new CopilotCliAgentExecutor(agent);
     }
     agent;
-    mainPromptTemplate = PromptTemplate.fromTemplate(`You are my command line executor assistant. 
-      Limit your response to the word 'completed' and assume that we are on {platform} operative system:
+    mainPromptTemplate = PromptTemplate.fromTemplate(`You are my command line executor assistant, limit your response to the word 'completed' and assume that we are on {platform} operative system:
   
-      {input}`);
+    Execute:  {input}
+    `);
     constructor(agent) {
         this.agent = agent;
     }
