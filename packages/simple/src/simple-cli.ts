@@ -2,15 +2,17 @@ import 'dotenv/config'
 import { fileURLToPath } from 'url';
 import path from 'node:path'
 import pc from 'picocolors'
-import { intro, outro, text, isCancel, spinner } from '@clack/prompts';
+import * as p from '@clack/prompts';
 
 import { 
   CopilotCliAgentExecutor, 
   ExecutionContext, 
   LogAttr, 
   banner, 
+  runCommand, 
   scanFolderAndImportPackage
 } from 'copilot-cli-core';
+import { NewCommandsCommandTool } from './new-command-command.js';
 
 const __filename = fileURLToPath(import.meta.url);
 
@@ -26,7 +28,7 @@ const main = async () => {
   }
   const _modules = await scanFolderAndImportPackage( commandPath );
   
-  const progress = spinner();
+  const progress = p.spinner();
 
   const execContext:ExecutionContext = {
     verbose: false,
@@ -51,31 +53,41 @@ const main = async () => {
     
   }
   
-  const executor = await CopilotCliAgentExecutor.create( _modules, execContext );
+  const executor = await CopilotCliAgentExecutor.create([ 
+          new NewCommandsCommandTool(progress), 
+          ..._modules
+        ], execContext );
 
   const _banner = await banner();
 
-  intro( pc.green(_banner));
+  p.intro( pc.green(_banner));
   
   do {
 
-    const input = await text({
+    const input = await p.text({
       message: 'Which commands would you like me to execute? ',
       placeholder: 'input prompt',
       initialValue: '',
       validate(value) {},
     });
   
-    if( isCancel(input) ) {
+    if( p.isCancel(input) ) {
       // return cancel( p.italic('goodbye! 👋'))
-      return outro(pc.italic(pc.yellow('goodbye! 👋')))
+      return p.outro(pc.italic(pc.yellow('goodbye! 👋')))
       //process.exit(0)
     }
   
     try {
      
       progress.start();
-      await executor.run( input );
+      if( input.startsWith("#") || input.startsWith('?')) {
+
+        await executor.run( input.substring(1) );
+
+      }
+      else {
+        await runCommand( input, execContext )
+      }
     
     }
     finally {
