@@ -7,7 +7,7 @@ export type LogAttr = 'red' | 'inverse' | 'dim';
 */
 export interface ExecutionContext {
     verbose: boolean;
-    setProgress(message: string): void;
+    setProgress(message?: string): void;
     log(message: string, attr?: LogAttr): void;
 }
 /**
@@ -18,6 +18,7 @@ export interface ExecutionContext {
 */
 export declare abstract class CommandTool<T extends z.ZodObject<any, any, any, any>> extends StructuredTool<T> {
     protected execContext?: ExecutionContext;
+    constructor();
     setExecutionContext(execContext?: ExecutionContext): void;
 }
 /**
@@ -59,7 +60,7 @@ export type RunCommandArg = {
  */
 export declare const runCommand: (arg: RunCommandArg | string, ctx?: ExecutionContext) => Promise<string>;
 export declare class CopilotCliAgentExecutor {
-    static create(commandModules: CommandTool<any>[], execContext?: ExecutionContext): Promise<CopilotCliAgentExecutor>;
+    static create(commandModules: StructuredTool[], execContext?: ExecutionContext): Promise<CopilotCliAgentExecutor>;
     private agent;
     private mainPromptTemplate;
     private constructor();

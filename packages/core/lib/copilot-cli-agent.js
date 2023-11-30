@@ -19,6 +19,9 @@ import { ListCommandsCommandTool } from './list-commands-command.js';
 */
 export class CommandTool extends StructuredTool {
     execContext;
+    constructor() {
+        super();
+    }
     setExecutionContext(execContext) {
         this.execContext = execContext;
     }
@@ -86,6 +89,13 @@ export const runCommand = async (arg, ctx) => {
     }
     return new Promise((resolve, reject) => {
         ctx?.setProgress(`Running command: ${options.cmd}`);
+        const parseCD = /^\s*cd (.+)/.exec(options.cmd);
+        // console.debug( 'parseCD', options.cmd, parseCD )
+        if (parseCD) {
+            process.chdir(expandTilde(parseCD[1]));
+            resolve(parseCD[1]);
+            return;
+        }
         const child = spawn(options.cmd, { stdio: ['inherit', 'pipe', 'pipe'], shell: true });
         let result = '';
         if (options.out) {
@@ -147,7 +157,11 @@ export class CopilotCliAgentExecutor {
             temperature: 0,
             callbacks: [new CopilotCliCallbackHandler(execContext)]
         });
-        commandModules.forEach(m => m.setExecutionContext(execContext));
+        commandModules.forEach(m => {
+            if (m instanceof CommandTool) {
+                m.setExecutionContext(execContext);
+            }
+        });
         // .map(m => m?.default)
         // .filter(m => m instanceof CommandTool)
         // //.filter(m => m && m.name && m.description && m.schema)
