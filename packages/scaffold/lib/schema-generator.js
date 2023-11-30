@@ -22,6 +22,7 @@ and the costraints:
         example: 
         USER: file Name - ASSISTANT: fileName.string().describe("the file name")
         USER: file Name "path of file" - ASSISSTANT: fileName.string().describe("path of file")
+4. NOT use schema after declaration
 
 You MUST start to interact to the USER following the process below
 
