@@ -1,5 +1,5 @@
-import { Tool } from "langchain/tools";
-import { CommandTool, ExecutionContext, runCommand } from "./copilot-cli-agent.js";
+import { StructuredTool, Tool } from "langchain/tools";
+import {  ExecutionContext } from "./copilot-cli-agent.js";
 import { CallbackManagerForToolRun } from "langchain/callbacks";
 
 export class ListCommandsCommandTool extends Tool {
@@ -8,7 +8,7 @@ export class ListCommandsCommandTool extends Tool {
     
     //private execContext?: ExecutionContext;
 
-    constructor( private commandModules: CommandTool<any>[], private execContext?: ExecutionContext ) {
+    constructor( private commandModules: StructuredTool[], private execContext?: ExecutionContext ) {
         super()
     }
 
