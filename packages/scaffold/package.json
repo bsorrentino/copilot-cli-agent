@@ -5,7 +5,7 @@
   "author": "bsorrentino <bartolomeo.sorrentino@gmail.com> (http://soulsoftware-bsc.blogspot.it/)",
   "homepage": "https://github.com/bsorrentino/copilot-cli-agent#readme",
   "license": "MIT",
-  "main": "lib/scaffoldng.js",
+  "main": "lib/scaffold.js",
   "type": "module",
   "directories": {
     "lib": "lib",
@@ -20,8 +20,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "tsx src/scaffold.ts",
-    "start": "node lib/scaffold.js dotenv_config_path=../../.env"
+    "test": "tsx src/index.ts",
+    "start": "node lib/index.js dotenv_config_path=../../.env"
   },
   "bugs": {
     "url": "https://github.com/bsorrentino/copilot-cli-agent/issues"
