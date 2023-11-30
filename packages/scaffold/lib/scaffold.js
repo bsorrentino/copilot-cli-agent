@@ -3,7 +3,7 @@ import pc from 'picocolors';
 import { generateZodSchema } from "./schema-generator.js";
 import { generateToolClass } from "./tool-generation.js";
 import * as path from "node:path";
-async function main() {
+export async function main() {
     const spinner = p.spinner();
     p.intro(pc.yellow(`Let generate new custom command 🎬`));
     const namePrompt = () => p.text({
@@ -63,15 +63,19 @@ async function main() {
         },
     });
     // console.debug(group.name, group.desc );
-    const schemaGenerator = generateZodSchema();
     let schemaCode = null;
+    let schemaGenerator;
     try {
+        schemaGenerator = generateZodSchema();
         spinner.start(pc.magenta('generating schema'));
         schemaCode = await schemaGenerator.create(group.schema);
         if (!schemaCode) {
-            console.warn(`problem generating a schema!`);
-            process.exit(0);
+            throw `problem generating a schema!`;
         }
+    }
+    catch (e) {
+        // console.error( 'schema generation error', e );
+        throw e;
     }
     finally {
         spinner.stop();
@@ -112,7 +116,7 @@ async function main() {
     }
     if (p.isCancel(schemaConfirm)) {
         p.cancel('Operation cancelled.');
-        process.exit(0);
+        throw `Operation cancelled.`;
     }
     try {
         spinner.start(pc.magenta('generating tool class'));
@@ -123,12 +127,11 @@ async function main() {
         });
     }
     catch (e) {
-        console.error(e);
-        process.exit(0);
+        throw e;
     }
     finally {
         spinner.stop();
     }
-    p.outro(pc.yellow(`Command generated! bye 👋`));
+    p.outro(pc.yellow(`Command ${group.name} generated! bye 👋`));
+    return `Command ${group.name} generated!`;
 }
-main();

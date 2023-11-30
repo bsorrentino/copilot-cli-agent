@@ -3,13 +3,14 @@ import os from 'node:os'
 import fs from 'node:fs'
 import { spawn } from 'node:child_process';
 import { readdir, stat, readFile } from 'node:fs/promises'
-import { StructuredTool } from 'langchain/tools';
+import { StructuredTool, Tool } from 'langchain/tools';
 import { z } from 'zod';
 import { AgentExecutor, initializeAgentExecutorWithOptions } from "langchain/agents";
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { PromptTemplate } from 'langchain/prompts';
 import { CopilotCliCallbackHandler } from './copilot-cli-callback.js';
 import { SystemCommandTool } from './system-command.js';
+import { ListCommandsCommandTool } from './list-commands-command.js';
 
 export type LogAttr = 'red' | 'inverse' | 'dim'; ;
 
@@ -21,7 +22,7 @@ export interface ExecutionContext {
 
   verbose: boolean;
 
-  setProgress(message: string): void;
+  setProgress(message?: string): void;
 
   log(message: string, attr?: LogAttr): void;
 }
@@ -35,6 +36,10 @@ export interface ExecutionContext {
 export abstract class CommandTool<T extends z.ZodObject<any, any, any, any>> extends StructuredTool<T> {
 
   protected execContext?: ExecutionContext;
+
+  constructor() {
+    super()
+  }
 
   setExecutionContext(execContext?: ExecutionContext) {
     this.execContext = execContext
@@ -99,8 +104,8 @@ export const expandTilde = (filePath: string) =>
   (filePath && filePath[0] === '~') ?
     path.join(os.homedir(), filePath.slice(1)) : filePath
 
-
 export type RunCommandArg = { cmd: string, out?: string, err?: string }
+
 /**
  * Runs a shell command and returns the output.
  * 
@@ -121,6 +126,17 @@ export const runCommand = async (arg: RunCommandArg | string, ctx?: ExecutionCon
   return new Promise<string>((resolve, reject) => {
 
     ctx?.setProgress(`Running command: ${options.cmd}`)
+
+    const parseCD = /^\s*cd (.+)/.exec(options.cmd)
+
+    // console.debug( 'parseCD', options.cmd, parseCD )
+
+    if (parseCD) {
+      process.chdir( expandTilde(parseCD[1]) )
+
+      resolve( parseCD[1] )
+      return 
+    }
 
     const child = spawn(options.cmd, { stdio: ['inherit', 'pipe', 'pipe'], shell: true })
 
@@ -182,7 +198,7 @@ export const runCommand = async (arg: RunCommandArg | string, ctx?: ExecutionCon
 
 export class CopilotCliAgentExecutor {
 
-  public static async create(commandModules: CommandTool<any>[], execContext?: ExecutionContext): Promise<CopilotCliAgentExecutor> {
+  public static async create(commandModules: StructuredTool[], execContext?: ExecutionContext): Promise<CopilotCliAgentExecutor> {
 
     const model = new ChatOpenAI({
       // modelName: "gpt-4",
@@ -195,7 +211,11 @@ export class CopilotCliAgentExecutor {
       callbacks: [new CopilotCliCallbackHandler(execContext)]
     });
 
-    commandModules.forEach( m => m.setExecutionContext(execContext));
+    commandModules.forEach( m => {
+                    if ( m instanceof CommandTool ) {
+                      m.setExecutionContext(execContext)
+                    }
+                  });
     
     // .map(m => m?.default)
     // .filter(m => m instanceof CommandTool)
@@ -204,6 +224,7 @@ export class CopilotCliAgentExecutor {
 
     const tools = [
       new SystemCommandTool(execContext),
+      new ListCommandsCommandTool(commandModules, execContext),
       ...commandModules
     ];
 
@@ -223,10 +244,10 @@ export class CopilotCliAgentExecutor {
   private agent: AgentExecutor;
 
   private mainPromptTemplate = PromptTemplate.fromTemplate(
-    `You are my command line executor assistant. 
-      Limit your response to the word 'completed' and assume that we are on {platform} operative system:
+    `You are my command line executor assistant, limit your response to the word 'completed' and assume that we are on {platform} operative system:
   
-      {input}`
+    Execute:  {input}
+    ` 
   );
 
   private constructor(agent: AgentExecutor) {

@@ -1,6 +1,6 @@
 {
   "name": "simple-cli",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "description": "simple copilot ai implementation",
   "type": "module",
   "keywords": [
@@ -25,6 +25,7 @@
   "scripts": {
     "test": "node ./__tests__/simple.test.js",
     "build": "tsc",
+    "build:commands": "npm run build -w cli-commands",
     "start": "node lib/simple-cli.js dotenv_config_path=../../.env"
   },
   "bugs": {

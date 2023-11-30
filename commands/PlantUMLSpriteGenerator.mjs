@@ -11,7 +11,7 @@ const schema = z.object({
     grayLevel: z.enum([GrayLevel.Four, GrayLevel.Eight, GrayLevel.Sixteen]).optional().default(GrayLevel.Sixteen),
 });
 class PlantUMLSpriteGeneratorTool extends CommandTool {
-    name = "plantUMLSpriteGenerator";
+    name = "plantuml_sprite_generator";
     description = "Generate a plantuml sprite from image.";
     schema = schema;
     async _call(arg) {
