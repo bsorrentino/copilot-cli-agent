@@ -1,6 +1,6 @@
 {
   "name": "langchain-copilot-cli",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "description": "",
   "main": "dist/cjs/blessed-cli.js",
   "workspaces": [
@@ -8,11 +8,11 @@
   ],
   "scripts": {
     "build": "npm run build --workspaces",
-    "simple:start": "npm run start -w simple-cli",
-    "termkit:build": "npm run build -w termkit-cli",
-    "termkit:start": "npm run start -w termkit-cli",
-    "scaffold:build": "npm run build -w copilot-cli-scaffold",
-    "scaffold:start": "npm run start -w copilot-cli-scaffold"
+    "start:simple": "npm run start -w simple-cli",
+    "build:termkit": "npm run build -w termkit-cli",
+    "start:termkit": "npm run start -w termkit-cli",
+    "build:scaffold": "npm run build -w copilot-cli-scaffold",
+    "start:scaffold": "npm run start -w copilot-cli-scaffold"
   },
   "keywords": [],
   "author": "bsorrentino <bartolomeo.sorrentino@gmail.com> (http://soulsoftware-bsc.blogspot.it/)",

@@ -9,6 +9,7 @@ import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { PromptTemplate } from 'langchain/prompts';
 import { CopilotCliCallbackHandler } from './copilot-cli-callback.js';
 import { SystemCommandTool } from './system-command.js';
+import { ListCommandsCommandTool } from './list-commands-command.js';
 ;
 /**
  * Abstract base class for command tools. Extends StructuredTool and adds an optional ExecutionContext property.
@@ -18,6 +19,9 @@ import { SystemCommandTool } from './system-command.js';
 */
 export class CommandTool extends StructuredTool {
     execContext;
+    constructor() {
+        super();
+    }
     setExecutionContext(execContext) {
         this.execContext = execContext;
     }
@@ -85,6 +89,13 @@ export const runCommand = async (arg, ctx) => {
     }
     return new Promise((resolve, reject) => {
         ctx?.setProgress(`Running command: ${options.cmd}`);
+        const parseCD = /^\s*cd (.+)/.exec(options.cmd);
+        // console.debug( 'parseCD', options.cmd, parseCD )
+        if (parseCD) {
+            process.chdir(expandTilde(parseCD[1]));
+            resolve(parseCD[1]);
+            return;
+        }
         const child = spawn(options.cmd, { stdio: ['inherit', 'pipe', 'pipe'], shell: true });
         let result = '';
         if (options.out) {
@@ -146,13 +157,18 @@ export class CopilotCliAgentExecutor {
             temperature: 0,
             callbacks: [new CopilotCliCallbackHandler(execContext)]
         });
-        commandModules.forEach(m => m.setExecutionContext(execContext));
+        commandModules.forEach(m => {
+            if (m instanceof CommandTool) {
+                m.setExecutionContext(execContext);
+            }
+        });
         // .map(m => m?.default)
         // .filter(m => m instanceof CommandTool)
         // //.filter(m => m && m.name && m.description && m.schema)
         // .map(m => m.setExecutionContext(execContext))
         const tools = [
             new SystemCommandTool(execContext),
+            new ListCommandsCommandTool(commandModules, execContext),
             ...commandModules
         ];
         const agent = await initializeAgentExecutorWithOptions(tools, model, {
@@ -166,10 +182,10 @@ export class CopilotCliAgentExecutor {
         return new CopilotCliAgentExecutor(agent);
     }
     agent;
-    mainPromptTemplate = PromptTemplate.fromTemplate(`You are my command line executor assistant. 
-      Limit your response to the word 'completed' and assume that we are on {platform} operative system:
+    mainPromptTemplate = PromptTemplate.fromTemplate(`You are my command line executor assistant, limit your response to the word 'completed' and assume that we are on {platform} operative system:
   
-      {input}`);
+    Execute:  {input}
+    `);
     constructor(agent) {
         this.agent = agent;
     }

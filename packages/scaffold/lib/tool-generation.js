@@ -17,8 +17,10 @@ class SaveFileTool extends StructuredTool {
     async _call(arg) {
         const { name, content, outputPath = process.cwd() } = arg;
         const fileName = path.extname(name) === '' ? name + '.mts' : name;
+        const filePath = (path.basename(outputPath) !== fileName) ?
+            path.join(outputPath, fileName) :
+            outputPath;
         // const filePath = path.join(process.cwd(), 'packages', 'commands', arg.name)
-        const filePath = path.join(outputPath, fileName);
         // console.debug("save file", arg, filePath )
         await fs.writeFile(filePath, content);
         return `file ${fileName} saved`;

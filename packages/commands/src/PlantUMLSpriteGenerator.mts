@@ -13,7 +13,7 @@ const schema = z.object({
 });
 
 class PlantUMLSpriteGeneratorTool extends CommandTool<typeof schema> {
-    name = "plantUMLSpriteGenerator";
+    name = "plantuml_sprite_generator";
     description = "Generate a plantuml sprite from image.";
     schema = schema;
     
