@@ -53,8 +53,9 @@ const main = async () => {
         }
         try {
             progress.start();
-            if (input.startsWith("#") || input.startsWith('?')) {
-                await executor.run(input.substring(1));
+            const inputMatch = /^\s*[#?]\s*(.+)/.exec(input);
+            if (inputMatch) {
+                await executor.run(inputMatch[1]);
             }
             else {
                 await runCommand(input, execContext);
@@ -65,4 +66,5 @@ const main = async () => {
         }
     } while (true);
 };
-main();
+main().catch(e => console.error(e));
+;
