@@ -9,7 +9,7 @@ class EncryptPdfTool extends CommandTool {
     description = "encrypt pdf file with password";
     schema = schema;
     async _call(arg) {
-        const command = `qpdf --replace-input --encrypt ${arg.password} ${arg.password} 256 -- ${arg.pdfpath}`;
+        const command = `qpdf --replace-input --encrypt ${arg.password} ${arg.password} 256 -- '${arg.pdfpath}'`;
         const res = await runCommand(command, this.execContext);
         return this.name + ' completed ' + res;
     }
