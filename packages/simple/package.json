@@ -1,6 +1,6 @@
 {
   "name": "simple-cli",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "simple copilot ai implementation",
   "type": "module",
   "keywords": [
