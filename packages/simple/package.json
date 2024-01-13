@@ -26,7 +26,7 @@
     "test": "node ./__tests__/simple.test.js",
     "build": "tsc",
     "build:commands": "npm run build -w cli-commands",
-    "start": "node lib/simple-cli.js dotenv_config_path=../../.env"
+    "start": "node -r dotenv/config lib/simple-cli.js dotenv_config_path=../../.env"
   },
   "bugs": {
     "url": "https://github.com/bsorrentino/copilot-cli-agent/issues"
