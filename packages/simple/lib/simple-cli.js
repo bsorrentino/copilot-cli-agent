@@ -4,6 +4,7 @@ import pc from 'picocolors';
 import * as p from '@clack/prompts';
 import { CopilotCliAgentExecutor, banner, runCommand, scanFolderAndImportPackage } from 'copilot-cli-core';
 import { NewCommandsCommandTool } from './new-command-command.js';
+import { textPrompt } from './prompt-text.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const main = async () => {
@@ -41,12 +42,16 @@ const main = async () => {
     const _banner = await banner();
     p.intro(pc.green(_banner));
     do {
-        const input = await p.text({
+        const prompt = textPrompt({
             message: 'Which commands would you like me to execute? ',
             placeholder: 'input prompt',
             initialValue: '',
             validate(value) { },
         });
+        prompt.on('cursor', (key, value) => {
+            console.log('cursor', key, value);
+        });
+        const input = await prompt.prompt();
         if (p.isCancel(input)) {
             // return cancel( p.italic('goodbye! 👋'))
             return p.outro(pc.italic(pc.yellow('goodbye! 👋')));
@@ -69,3 +74,20 @@ const main = async () => {
 };
 main().catch(e => console.error(e));
 ;
+/*
+import { TextPrompt, isCancel } from '@clack/core';
+
+const pp = new TextPrompt({
+  render() {
+    return `What's your name?\n${this.valueWithCursor}`;
+  },
+});
+
+pp.on('cursor', (key, value) => {
+  console.log('cursor', key, value )
+})
+const name = await pp.prompt();
+if (isCancel(name)) {
+  process.exit(0);
+}
+*/
