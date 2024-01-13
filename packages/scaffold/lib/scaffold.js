@@ -35,10 +35,10 @@ export async function main() {
     });
     const commandPrompt = () => {
         p.note(`
-        to describe the command use notation <arg name> to reference arguments in the schema.
+      to describe the command use notation <arg name> to reference arguments in the schema.
 
-        It isn't supported redirect output to file
-        `, 'command hints');
+      It isn't supported redirect output to file
+      `, 'command hints');
         return p.text({
             message: pc.green('command to execute'),
             placeholder: 'shell command, use <arg> to reference arguments in the schema',
@@ -65,17 +65,17 @@ export async function main() {
     // console.debug(group.name, group.desc );
     let schemaCode = null;
     let schemaGenerator;
+    spinner.start(pc.magenta('generating schema'));
     try {
         schemaGenerator = generateZodSchema();
-        spinner.start(pc.magenta('generating schema'));
         schemaCode = await schemaGenerator.create(group.schema);
         if (!schemaCode) {
             throw `problem generating a schema!`;
         }
     }
     catch (e) {
-        // console.error( 'schema generation error', e );
-        throw e;
+        console.error('schema generation error', e);
+        process.exit(-1);
     }
     finally {
         spinner.stop();
@@ -102,13 +102,17 @@ export async function main() {
             p.cancel('Operation cancelled.');
             process.exit(0);
         }
+        spinner.start(pc.magenta('updating schema'));
         try {
-            spinner.start(pc.magenta('updating schema'));
             schemaCode = await schemaGenerator.update(schemaDescUpdatePrompt);
             if (!schemaCode) {
                 console.warn(`problem generating a schema!`);
                 process.exit(0);
             }
+        }
+        catch (e) {
+            console.error('schema update error', e);
+            process.exit(-1);
         }
         finally {
             spinner.stop();
@@ -118,8 +122,8 @@ export async function main() {
         p.cancel('Operation cancelled.');
         throw `Operation cancelled.`;
     }
+    spinner.start(pc.magenta('generating tool class'));
     try {
-        spinner.start(pc.magenta('generating tool class'));
         const tool = await generateToolClass({
             ...group,
             schema: schemaCode,
@@ -127,7 +131,8 @@ export async function main() {
         });
     }
     catch (e) {
-        throw e;
+        console.error('generating tool class error', e);
+        process.exit(-1);
     }
     finally {
         spinner.stop();
