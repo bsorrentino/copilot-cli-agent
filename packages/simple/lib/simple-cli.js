@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import { fileURLToPath } from 'url';
 import path from 'node:path';
 import pc from 'picocolors';
@@ -17,19 +16,21 @@ const main = async () => {
     const progress = p.spinner();
     const execContext = {
         verbose: false,
-        log: (msg, attr) => {
-            switch (attr) {
-                case 'red':
-                    msg = pc.red(msg);
+        log: (msg, type) => {
+            switch (type) {
+                case 'info':
+                    p.log.info(msg);
                     break;
-                case 'inverse':
-                    msg = pc.inverse(msg);
+                case 'warn':
+                    p.log.warning(msg);
                     break;
-                case 'dim':
-                    msg = pc.dim(msg);
+                case 'error':
+                    p.log.error(msg);
                     break;
+                default:
+                    p.log.message(msg);
             }
-            console.log(msg);
+            // console.log(msg)
         },
         setProgress: (message) => progress.message(message),
     };
@@ -53,8 +54,9 @@ const main = async () => {
         }
         try {
             progress.start();
-            if (input.startsWith("#") || input.startsWith('?')) {
-                await executor.run(input.substring(1));
+            const inputMatch = /^\s*[#?]\s*(.+)/.exec(input);
+            if (inputMatch) {
+                await executor.run(inputMatch[1]);
             }
             else {
                 await runCommand(input, execContext);
@@ -65,4 +67,5 @@ const main = async () => {
         }
     } while (true);
 };
-main();
+main().catch(e => console.error(e));
+;

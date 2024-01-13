@@ -33,35 +33,35 @@ export async function main() {
       },
     });
 
-    const schemaDescPrompt = () => 
-    p.text({
-      message: pc.green('schema description'),
-      placeholder: 'meaningful description of command schema',
-      initialValue: 'properties: ',
+  const schemaDescPrompt = () => 
+  p.text({
+    message: pc.green('schema description'),
+    placeholder: 'meaningful description of command schema',
+    initialValue: 'properties: ',
+    validate(value) {
+      if (value.length === 0) return `Value is required!`;
+    },
+  });
+
+  const commandPrompt = () => {
+    
+    p.note( 
+      `
+      to describe the command use notation <arg name> to reference arguments in the schema.
+
+      It isn't supported redirect output to file
+      `, 
+      'command hints')
+    return p.text({
+      message: pc.green('command to execute'),
+      placeholder: 'shell command, use <arg> to reference arguments in the schema',
+      initialValue: 'echo "hello command"',
       validate(value) {
         if (value.length === 0) return `Value is required!`;
       },
     });
 
-    const commandPrompt = () => {
-      
-      p.note( 
-        `
-        to describe the command use notation <arg name> to reference arguments in the schema.
-
-        It isn't supported redirect output to file
-        `, 
-        'command hints')
-      return p.text({
-        message: pc.green('command to execute'),
-        placeholder: 'shell command, use <arg> to reference arguments in the schema',
-        initialValue: 'echo "hello command"',
-        validate(value) {
-          if (value.length === 0) return `Value is required!`;
-        },
-      });
-  
-    }
+  }
   
   const group = await p.group(
     {
@@ -86,18 +86,19 @@ export async function main() {
 
   let schemaGenerator:ZodSchemaGenerator
 
+  spinner.start( pc.magenta('generating schema') );
+
   try {
     schemaGenerator = generateZodSchema()
 
-    spinner.start( pc.magenta('generating schema') );
     schemaCode  = await schemaGenerator.create( group.schema );
     if( !schemaCode ) {
       throw `problem generating a schema!`
     }
   }
   catch( e ) {
-    // console.error( 'schema generation error', e );
-    throw e
+    console.error( 'schema generation error', e );
+    process.exit(-1)
   }
   finally {
     spinner.stop()
@@ -113,44 +114,49 @@ export async function main() {
       ${pc.green('Do you confirm schema above?')}`,
     });
   
-    let schemaConfirm: boolean | symbol = false;
+  let schemaConfirm: boolean | symbol = false;
 
-    while( !(schemaConfirm = await askForconfirmSchema(schemaCode)) ) {
+  while( !(schemaConfirm = await askForconfirmSchema(schemaCode)) ) {
 
-      const schemaDescUpdatePrompt = await p.text({
-        message: pc.green('schema update'),
-        placeholder: 'describe updates to the schema',
-        initialValue: '',
-        validate(value) {
-          if (value.length === 0) return `Value is required!`;
-        },
-      });
+    const schemaDescUpdatePrompt = await p.text({
+      message: pc.green('schema update'),
+      placeholder: 'describe updates to the schema',
+      initialValue: '',
+      validate(value) {
+        if (value.length === 0) return `Value is required!`;
+      },
+    });
 
-      if( p.isCancel(schemaDescUpdatePrompt) ) {
-          p.cancel('Operation cancelled.');
-          process.exit(0);
-      }
-
-      try {
-        spinner.start( pc.magenta('updating schema') );
-        schemaCode  = await schemaGenerator.update( schemaDescUpdatePrompt );
-        if( !schemaCode ) {
-          console.warn( `problem generating a schema!`)
-          process.exit(0)
-        }  
-      }
-      finally {
-        spinner.stop()
-      }
+    if( p.isCancel(schemaDescUpdatePrompt) ) {
+        p.cancel('Operation cancelled.');
+        process.exit(0);
     }
+
+    spinner.start( pc.magenta('updating schema') );
+
+    try {
+      schemaCode  = await schemaGenerator.update( schemaDescUpdatePrompt );
+      if( !schemaCode ) {
+        console.warn( `problem generating a schema!`)
+        process.exit(0)
+      }  
+    }
+    catch( e ) {
+      console.error( 'schema update error', e );
+      process.exit(-1)
+    }  
+    finally {
+      spinner.stop()
+    }
+  }
 
   if( p.isCancel(schemaConfirm) ) {
     p.cancel('Operation cancelled.');
     throw `Operation cancelled.`
   }
 
+  spinner.start( pc.magenta('generating tool class') );
   try {
-    spinner.start( pc.magenta('generating tool class') );
 
     const tool  = await generateToolClass( { 
       ...group, 
@@ -159,8 +165,9 @@ export async function main() {
   
   }
   catch( e ) {
-    throw e
-  }
+    console.error( 'generating tool class error', e );
+    process.exit(-1)
+}
   finally {
     spinner.stop()
   }

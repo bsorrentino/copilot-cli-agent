@@ -87,8 +87,8 @@ export const runCommand = async (arg, ctx) => {
     else {
         options = arg;
     }
+    ctx?.setProgress(`Running command: ${options.cmd}`);
     return new Promise((resolve, reject) => {
-        ctx?.setProgress(`Running command: ${options.cmd}`);
         const parseCD = /^\s*cd (.+)/.exec(options.cmd);
         // console.debug( 'parseCD', options.cmd, parseCD )
         if (parseCD) {
@@ -102,7 +102,7 @@ export const runCommand = async (arg, ctx) => {
             const output = fs.createWriteStream(options.out);
             child.stdout.pipe(output);
             if (ctx?.verbose) {
-                ctx?.log(`${options.cmd} > ${options.out}`, 'inverse');
+                ctx?.log(`${options.cmd} > ${options.out}`, 'info');
             }
             else {
                 ctx?.log('');
@@ -114,7 +114,7 @@ export const runCommand = async (arg, ctx) => {
             child.stdout.on('data', data => {
                 result = data.toString();
                 if (ctx?.verbose) {
-                    ctx?.log(options.cmd, 'inverse');
+                    ctx?.log(options.cmd, 'info');
                 }
                 else {
                     ctx?.log('');
@@ -131,12 +131,12 @@ export const runCommand = async (arg, ctx) => {
             child.stderr.setEncoding('utf8');
             child.stderr.on('data', data => {
                 result = data.toString();
-                ctx?.log(result, 'red');
+                ctx?.log(result, 'error');
             });
         }
         // Handle errors
         child.on('error', error => {
-            ctx?.log(options.cmd, 'red');
+            ctx?.log(options.cmd, 'error');
             reject(error.message);
         });
         // Handle process exit

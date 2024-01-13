@@ -1,4 +1,3 @@
-import 'dotenv/config'
 import { fileURLToPath } from 'url';
 import path from 'node:path'
 import pc from 'picocolors'
@@ -7,7 +6,7 @@ import * as p from '@clack/prompts';
 import { 
   CopilotCliAgentExecutor, 
   ExecutionContext, 
-  LogAttr, 
+  LogType, 
   banner, 
   runCommand, 
   scanFolderAndImportPackage
@@ -33,20 +32,22 @@ const main = async () => {
   const execContext:ExecutionContext = {
     verbose: false,
 
-    log: (msg: string, attr?: LogAttr): void => {
-      switch(attr) {
-				case 'red':
-					msg = pc.red(msg);
+    log: (msg: string, type?: LogType): void => {
+      switch(type) {
+				case 'info':
+					p.log.info(msg)
 					break;
-				case 'inverse':
-					msg = pc.inverse(msg);
+				case 'warn':
+					p.log.warning(msg)
 					break;
-        case 'dim':
-          msg = pc.dim(msg);
+        case 'error':
+          p.log.error(msg)
           break;
-    
+        default:
+          p.log.message(msg)
 			}
-      console.log(msg)
+      
+      // console.log(msg)
     },
 
     setProgress: (message: string): void => progress.message(message),
@@ -80,16 +81,17 @@ const main = async () => {
     try {
      
       progress.start();
-      if( input.startsWith("#") || input.startsWith('?')) {
+      const inputMatch = /^\s*[#?]\s*(.+)/.exec(input)
+      if( inputMatch ) {
 
-        await executor.run( input.substring(1) );
+        await executor.run( inputMatch[1] );
 
       }
       else {
         await runCommand( input, execContext )
       }
     
-    }
+    }  
     finally {
       progress.stop();
     }
@@ -99,4 +101,5 @@ const main = async () => {
 
 }
 
-main();
+main().catch( e => console.error( e ) );
+;

@@ -6,7 +6,7 @@ import path from 'node:path'
 import { 
   CopilotCliAgentExecutor, 
   ExecutionContext, 
-  LogAttr,  
+  LogType,  
   scanFolderAndImportPackage 
 } from 'copilot-cli-core';
 
@@ -156,7 +156,7 @@ class ExecutionContextImpl implements ExecutionContext {
   setProgress( message: string ): void {
   }
 
-  log( message: string, attr?: LogAttr ): void {
+  log( message: string, attr?: LogType ): void {
     logger.log(message) 
   }
   

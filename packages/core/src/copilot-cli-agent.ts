@@ -12,7 +12,7 @@ import { CopilotCliCallbackHandler } from './copilot-cli-callback.js';
 import { SystemCommandTool } from './system-command.js';
 import { ListCommandsCommandTool } from './list-commands-command.js';
 
-export type LogAttr = 'red' | 'inverse' | 'dim'; ;
+export type LogType = 'info' | 'warn' | 'error'; ;
 
 /**
  * Interface for execution context passed to command tools. 
@@ -24,7 +24,7 @@ export interface ExecutionContext {
 
   setProgress(message?: string): void;
 
-  log(message: string, attr?: LogAttr): void;
+  log(message: string, attr?: LogType): void;
 }
 
 /**
@@ -123,9 +123,9 @@ export const runCommand = async (arg: RunCommandArg | string, ctx?: ExecutionCon
     options = arg
   }
 
-  return new Promise<string>((resolve, reject) => {
+  ctx?.setProgress(`Running command: ${options.cmd}`)
 
-    ctx?.setProgress(`Running command: ${options.cmd}`)
+  return new Promise<string>((resolve, reject) => {
 
     const parseCD = /^\s*cd (.+)/.exec(options.cmd)
 
@@ -146,7 +146,7 @@ export const runCommand = async (arg: RunCommandArg | string, ctx?: ExecutionCon
       const output = fs.createWriteStream(options.out);
       child.stdout.pipe(output);
       if( ctx?.verbose ) {
-        ctx?.log( `${options.cmd} > ${options.out}`, 'inverse');
+        ctx?.log( `${options.cmd} > ${options.out}`, 'info');
       }
       else {
         ctx?.log('')
@@ -158,7 +158,7 @@ export const runCommand = async (arg: RunCommandArg | string, ctx?: ExecutionCon
       child.stdout.on('data', data => {
         result = data.toString();
         if( ctx?.verbose )  {
-          ctx?.log( options.cmd, 'inverse')
+          ctx?.log( options.cmd, 'info')
         }
         else {
           ctx?.log('')
@@ -177,13 +177,13 @@ export const runCommand = async (arg: RunCommandArg | string, ctx?: ExecutionCon
       child.stderr.setEncoding('utf8')
       child.stderr.on('data', data => {
         result = data.toString()
-        ctx?.log(result, 'red');
+        ctx?.log(result, 'error');
       })
     }
 
     // Handle errors
     child.on('error', error => {
-      ctx?.log(options.cmd, 'red')
+      ctx?.log(options.cmd, 'error')
       reject(error.message)
 
     })
