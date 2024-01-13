@@ -19,8 +19,7 @@ class ConvertMoveToGifTool extends CommandTool {
         const outputPath = replaceExt(arg.videoPath, ".gif");
         const command = `ffmpeg -loglevel error -i ${arg.videoPath} -vf "fps=${arg.fps},scale=${arg.scale}:-1:flags=lanczos" -c:v gif ${outputPath} -y`;
         const res = await runCommand(command);
-        // this.execContext?.log(`\n${command}`);
-        this.execContext?.log(`${command}`);
+        this.execContext?.log(command);
         return this.name + ' completed ' + res;
     }
 }
