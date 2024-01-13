@@ -129,13 +129,13 @@ const main = async () => {
         verbose: true,
         log: (msg, attr) => {
             switch (attr) {
-                case 'red':
+                case 'error':
                     msg = `^R${msg}`;
                     break;
-                case 'inverse':
+                case 'warn':
                     msg = `^!${msg}`;
                     break;
-                case 'dim':
+                case 'info':
                     msg = `^-${msg}`;
                     break;
             }

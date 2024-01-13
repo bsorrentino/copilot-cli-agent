@@ -1,6 +1,6 @@
 import { StructuredTool } from 'langchain/tools';
 import { z } from 'zod';
-export type LogAttr = 'red' | 'inverse' | 'dim';
+export type LogType = 'info' | 'warn' | 'error';
 /**
  * Interface for execution context passed to command tools.
  * Provides logging and progress tracking capabilities.
@@ -8,7 +8,7 @@ export type LogAttr = 'red' | 'inverse' | 'dim';
 export interface ExecutionContext {
     verbose: boolean;
     setProgress(message?: string): void;
-    log(message: string, attr?: LogAttr): void;
+    log(message: string, attr?: LogType): void;
 }
 /**
  * Abstract base class for command tools. Extends StructuredTool and adds an optional ExecutionContext property.

@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import termkit, { CoordsOptions, FocusType, Element } from '@bsorrentino/terminal-kit' ;
-import { CopilotCliAgentExecutor, ExecutionContext, LogAttr, scanFolderAndImportPackage } from 'copilot-cli-core';
+import { CopilotCliAgentExecutor, ExecutionContext, LogType, scanFolderAndImportPackage } from 'copilot-cli-core';
 import { CommandsWindow } from './commands.js'; 
 import fs from 'node:fs/promises';
 
@@ -148,15 +148,15 @@ const main = async () => {
 
 	const execContext:ExecutionContext = {
 		verbose: true,
-		log: (msg: string, attr?: LogAttr) => {
+		log: (msg: string, attr?: LogType) => {
 			switch(attr) {
-				case 'red':
+				case 'error':
 					msg = `^R${msg}`;
 					break;
-				case 'inverse':
+				case 'warn':
 					msg = `^!${msg}`;
 					break;
-				case 'dim':
+				case 'info':
 					msg = `^-${msg}`;
 					break;
 			}
