@@ -159,6 +159,7 @@ const loader = blessed.loading({
 class ExecutionContextImpl {
     constructor(verbose = false) {
         this.verbose = verbose;
+        this.history = new copilot_cli_core_1.CommandHistory();
     }
     setProgress(message) {
     }

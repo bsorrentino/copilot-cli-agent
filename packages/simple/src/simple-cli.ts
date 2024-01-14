@@ -2,23 +2,27 @@ import { fileURLToPath } from 'url';
 import path from 'node:path'
 import pc from 'picocolors'
 import * as p from '@clack/prompts';
-
 import { 
   CopilotCliAgentExecutor, 
   ExecutionContext, 
   LogType, 
   banner, 
   runCommand, 
-  scanFolderAndImportPackage
+  scanFolderAndImportPackage,
+  CommandHistory,
 } from 'copilot-cli-core';
+
 import { NewCommandsCommandTool } from './new-command-command.js';
+import { textPrompt } from './prompt-text.js'
 
 const __filename = fileURLToPath(import.meta.url);
-
 const __dirname = path.dirname(__filename);
 
-const main = async () => {
 
+
+
+const main = async () => {
+ 
   // const _modules = await scanFolderAndImportPackage( path.join( __dirname, 'commands') );
 
   const commandPath = process.env['COMMANDS_PATH'];
@@ -30,6 +34,8 @@ const main = async () => {
   const progress = p.spinner();
 
   const execContext:ExecutionContext = {
+
+    history: new CommandHistory(),
     verbose: false,
 
     log: (msg: string, type?: LogType): void => {
@@ -65,12 +71,46 @@ const main = async () => {
   
   do {
 
-    const input = await p.text({
+    const prompt = textPrompt({
       message: 'Which commands would you like me to execute? ',
       placeholder: 'input prompt',
       initialValue: '',
-      validate(value) {},
-    });
+      validate(value) { 
+        if( value.length === 0 ) {
+          return "Please input a command!"
+        }
+      },
+    })
+    prompt.on('cursor', key => {
+      if( execContext.history.isEmpty ) {
+        return 
+      }
+
+      switch(key) {
+        case 'up':
+          execContext.history.moveBack()
+          if( execContext.history.current ) {
+            prompt.value = execContext.history.current
+            prompt.valueWithCursor = prompt.value
+          }
+          break
+        case 'down':
+          if( !execContext.history.isLast ) {
+            execContext.history.moveNext()
+            prompt.value = execContext.history.current
+            prompt.valueWithCursor = prompt.value  
+          }
+
+          break
+      }
+      
+    })
+    prompt.on('submit', cmd => {
+      execContext.history.push( cmd )
+      console.log( execContext.history.current )
+    })
+
+    const input = await prompt.prompt();
   
     if( p.isCancel(input) ) {
       // return cancel( p.italic('goodbye! 👋'))
@@ -78,6 +118,7 @@ const main = async () => {
       //process.exit(0)
     }
   
+    
     try {
      
       progress.start();
@@ -103,3 +144,21 @@ const main = async () => {
 
 main().catch( e => console.error( e ) );
 ;
+
+/*
+import { TextPrompt, isCancel } from '@clack/core';
+
+const pp = new TextPrompt({
+  render() {
+    return `What's your name?\n${this.valueWithCursor}`;
+  },
+});
+
+pp.on('cursor', (key, value) => {
+  console.log('cursor', key, value )
+})
+const name = await pp.prompt();
+if (isCancel(name)) {
+  process.exit(0);
+}
+*/

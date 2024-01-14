@@ -6,7 +6,7 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
 var _SpinnerElement_instances, _SpinnerElement_init, _SpinnerElement_stop;
 import 'dotenv/config';
 import termkit from '@bsorrentino/terminal-kit';
-import { CopilotCliAgentExecutor, scanFolderAndImportPackage } from 'copilot-cli-core';
+import { CommandHistory, CopilotCliAgentExecutor, scanFolderAndImportPackage } from 'copilot-cli-core';
 import { CommandsWindow } from './commands.js';
 import fs from 'node:fs/promises';
 const term = termkit.terminal;
@@ -126,6 +126,7 @@ const main = async () => {
     commands.setContent(["system_cmd", ..._modules.map(m => m.name)]);
     const spinner = new SpinnerElement();
     const execContext = {
+        history: new CommandHistory(),
         verbose: true,
         log: (msg, attr) => {
             switch (attr) {
