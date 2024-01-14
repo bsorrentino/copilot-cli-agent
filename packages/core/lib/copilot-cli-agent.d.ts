@@ -6,9 +6,19 @@ export type LogType = 'info' | 'warn' | 'error';
  * Provides logging and progress tracking capabilities.
 */
 export interface ExecutionContext {
+    readonly history: CommandHistory;
     verbose: boolean;
     setProgress(message?: string): void;
     log(message: string, attr?: LogType): void;
+}
+export declare class CommandHistory {
+    #private;
+    push(cmd: string): CommandHistory;
+    moveBack(): CommandHistory;
+    moveNext(): CommandHistory;
+    get isLast(): boolean;
+    get current(): string | undefined;
+    get isEmpty(): boolean;
 }
 /**
  * Abstract base class for command tools. Extends StructuredTool and adds an optional ExecutionContext property.

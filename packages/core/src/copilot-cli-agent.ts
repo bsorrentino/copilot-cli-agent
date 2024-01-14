@@ -20,11 +20,52 @@ export type LogType = 'info' | 'warn' | 'error'; ;
 */
 export interface ExecutionContext {
 
+  readonly history: CommandHistory;
+
   verbose: boolean;
 
   setProgress(message?: string): void;
 
   log(message: string, attr?: LogType): void;
+
+}
+
+export class CommandHistory {
+  #history = new Array<string>();
+  #index?:number
+
+  push(cmd:string):CommandHistory {
+    this.#index = this.#history.length;
+    this.#history.push(cmd);
+    return this
+  }
+
+  moveBack():CommandHistory {
+    if( this.#index !== undefined && this.#index > 0 ) {
+      this.#index--;
+    }
+    return this
+  }
+  
+  moveNext():CommandHistory {
+    if( this.#index !== undefined && this.#index < this.#history.length - 1 ) {
+      this.#index++;
+    }
+    return this
+  }
+
+  get isLast():boolean {
+    return this.#index === this.#history.length - 1;
+  }
+
+  get current():string | undefined {
+    if( this.#index !== undefined )
+      return this.#history[this.#index];
+  }
+
+  get isEmpty():boolean {
+    return this.#history.length === 0;
+  }
 }
 
 /**
@@ -124,7 +165,8 @@ export const runCommand = async (arg: RunCommandArg | string, ctx?: ExecutionCon
   }
 
   ctx?.setProgress(`Running command: ${options.cmd}`)
-
+  ctx?.history.push(options.cmd)
+  
   return new Promise<string>((resolve, reject) => {
 
     const parseCD = /^\s*cd (.+)/.exec(options.cmd)

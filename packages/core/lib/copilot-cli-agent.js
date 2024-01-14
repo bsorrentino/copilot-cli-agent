@@ -11,6 +11,37 @@ import { CopilotCliCallbackHandler } from './copilot-cli-callback.js';
 import { SystemCommandTool } from './system-command.js';
 import { ListCommandsCommandTool } from './list-commands-command.js';
 ;
+export class CommandHistory {
+    #history = new Array();
+    #index;
+    push(cmd) {
+        this.#index = this.#history.length;
+        this.#history.push(cmd);
+        return this;
+    }
+    moveBack() {
+        if (this.#index !== undefined && this.#index > 0) {
+            this.#index--;
+        }
+        return this;
+    }
+    moveNext() {
+        if (this.#index !== undefined && this.#index < this.#history.length - 1) {
+            this.#index++;
+        }
+        return this;
+    }
+    get isLast() {
+        return this.#index === this.#history.length - 1;
+    }
+    get current() {
+        if (this.#index !== undefined)
+            return this.#history[this.#index];
+    }
+    get isEmpty() {
+        return this.#history.length === 0;
+    }
+}
 /**
  * Abstract base class for command tools. Extends StructuredTool and adds an optional ExecutionContext property.
  *
@@ -88,6 +119,7 @@ export const runCommand = async (arg, ctx) => {
         options = arg;
     }
     ctx?.setProgress(`Running command: ${options.cmd}`);
+    ctx?.history.push(options.cmd);
     return new Promise((resolve, reject) => {
         const parseCD = /^\s*cd (.+)/.exec(options.cmd);
         // console.debug( 'parseCD', options.cmd, parseCD )

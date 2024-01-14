@@ -1,5 +1,5 @@
 /**
- * code extracted from https://github.com/natemoo-re/clack/blob/main/packages/prompts/src/index.ts
+ * code extracted by https://github.com/natemoo-re/clack/blob/main/packages/prompts/src/index.ts
  */
 import { TextPrompt } from '@clack/core';
 import isUnicodeSupported from 'is-unicode-supported';

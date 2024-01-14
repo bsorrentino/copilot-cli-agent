@@ -4,6 +4,7 @@ import 'dotenv/config'
 import * as blessed from 'blessed'
 import path from 'node:path'
 import { 
+  CommandHistory,
   CopilotCliAgentExecutor, 
   ExecutionContext, 
   LogType,  
@@ -150,7 +151,7 @@ const loader = blessed.loading({
 });
 
 class ExecutionContextImpl implements ExecutionContext {
-
+  history: CommandHistory = new CommandHistory();
   constructor( public verbose = false ) {}
 
   setProgress( message: string ): void {

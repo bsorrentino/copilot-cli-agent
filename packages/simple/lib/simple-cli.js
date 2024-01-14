@@ -2,7 +2,7 @@ import { fileURLToPath } from 'url';
 import path from 'node:path';
 import pc from 'picocolors';
 import * as p from '@clack/prompts';
-import { CopilotCliAgentExecutor, banner, runCommand, scanFolderAndImportPackage } from 'copilot-cli-core';
+import { CopilotCliAgentExecutor, banner, runCommand, scanFolderAndImportPackage, CommandHistory, } from 'copilot-cli-core';
 import { NewCommandsCommandTool } from './new-command-command.js';
 import { textPrompt } from './prompt-text.js';
 const __filename = fileURLToPath(import.meta.url);
@@ -16,6 +16,7 @@ const main = async () => {
     const _modules = await scanFolderAndImportPackage(commandPath);
     const progress = p.spinner();
     const execContext = {
+        history: new CommandHistory(),
         verbose: false,
         log: (msg, type) => {
             switch (type) {
@@ -46,10 +47,36 @@ const main = async () => {
             message: 'Which commands would you like me to execute? ',
             placeholder: 'input prompt',
             initialValue: '',
-            validate(value) { },
+            validate(value) {
+                if (value.length === 0) {
+                    return "Please input a command!";
+                }
+            },
         });
-        prompt.on('cursor', (key, value) => {
-            console.log('cursor', key, value);
+        prompt.on('cursor', key => {
+            if (execContext.history.isEmpty) {
+                return;
+            }
+            switch (key) {
+                case 'up':
+                    execContext.history.moveBack();
+                    if (execContext.history.current) {
+                        prompt.value = execContext.history.current;
+                        prompt.valueWithCursor = prompt.value;
+                    }
+                    break;
+                case 'down':
+                    if (!execContext.history.isLast) {
+                        execContext.history.moveNext();
+                        prompt.value = execContext.history.current;
+                        prompt.valueWithCursor = prompt.value;
+                    }
+                    break;
+            }
+        });
+        prompt.on('submit', cmd => {
+            execContext.history.push(cmd);
+            console.log(execContext.history.current);
         });
         const input = await prompt.prompt();
         if (p.isCancel(input)) {

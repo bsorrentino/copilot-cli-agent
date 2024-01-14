@@ -10,7 +10,6 @@ import {
 import isUnicodeSupported from 'is-unicode-supported';
 import color from 'picocolors';
 
-
 const unicode = isUnicodeSupported();
 const s = (c: string, fallback: string) => (unicode ? c : fallback);
 
