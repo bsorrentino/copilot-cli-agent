@@ -10,7 +10,7 @@ import {
   runCommand, 
   scanFolderAndImportPackage,
   CommandHistory,
-} from 'copilot-cli-core';
+} from '@bsorrentino/copilot-cli-core';
 
 import { NewCommandsCommandTool } from './new-command-command.js';
 import { textPrompt } from './prompt-text.js'

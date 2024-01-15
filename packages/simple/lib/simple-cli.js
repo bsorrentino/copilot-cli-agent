@@ -2,7 +2,7 @@ import { fileURLToPath } from 'url';
 import path from 'node:path';
 import pc from 'picocolors';
 import * as p from '@clack/prompts';
-import { CopilotCliAgentExecutor, banner, runCommand, scanFolderAndImportPackage, CommandHistory, } from 'copilot-cli-core';
+import { CopilotCliAgentExecutor, banner, runCommand, scanFolderAndImportPackage, CommandHistory, } from '@bsorrentino/copilot-cli-core';
 import { NewCommandsCommandTool } from './new-command-command.js';
 import { textPrompt } from './prompt-text.js';
 const __filename = fileURLToPath(import.meta.url);
