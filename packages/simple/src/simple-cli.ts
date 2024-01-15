@@ -18,9 +18,6 @@ import { textPrompt } from './prompt-text.js'
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-
-
-
 const main = async () => {
  
   // const _modules = await scanFolderAndImportPackage( path.join( __dirname, 'commands') );
@@ -65,7 +62,7 @@ const main = async () => {
           ..._modules
         ], execContext );
 
-  const _banner = await banner();
+  const _banner = await banner( path.dirname(__dirname) );
 
   p.intro( pc.green(_banner));
   

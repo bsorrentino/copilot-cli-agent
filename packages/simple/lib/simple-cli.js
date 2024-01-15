@@ -40,7 +40,7 @@ const main = async () => {
         new NewCommandsCommandTool(progress),
         ..._modules
     ], execContext);
-    const _banner = await banner();
+    const _banner = await banner(path.dirname(__dirname));
     p.intro(pc.green(_banner));
     do {
         const prompt = textPrompt({
