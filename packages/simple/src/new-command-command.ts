@@ -1,7 +1,7 @@
 import { Tool } from "langchain/tools";
 import { CommandTool, ExecutionContext, runCommand } from "copilot-cli-core";
 import { CallbackManagerForToolRun } from "langchain/callbacks";
-import { main } from 'copilot-cli-scaffold'
+import { main } from '@bsorrentino/copilot-cli-scaffold'
 
 type Progress = {
     start: (msg?: string) => void;

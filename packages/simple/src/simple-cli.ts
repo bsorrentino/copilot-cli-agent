@@ -10,7 +10,7 @@ import {
   runCommand, 
   scanFolderAndImportPackage,
   CommandHistory,
-} from 'copilot-cli-core';
+} from '@bsorrentino/copilot-cli-core';
 
 import { NewCommandsCommandTool } from './new-command-command.js';
 import { textPrompt } from './prompt-text.js'
@@ -22,11 +22,12 @@ const main = async () => {
  
   // const _modules = await scanFolderAndImportPackage( path.join( __dirname, 'commands') );
 
-  const commandPath = process.env['COMMANDS_PATH'];
-  if(!commandPath ) {
-    throw new Error("'COMMANDS_PATH' environment variable is not defined!");
+  let commandsPath = process.env['COMMANDS_PATH'];
+  if(!commandsPath ) {
+    commandsPath = path.join(process.cwd(), 'commands')
+    p.log.warning(`'COMMANDS_PATH' environment variable is not defined! the commands path is set to ${commandsPath} by default` )
   }
-  const _modules = await scanFolderAndImportPackage( commandPath );
+  const _modules = await scanFolderAndImportPackage( commandsPath );
   
   const progress = p.spinner();
 
@@ -139,23 +140,6 @@ const main = async () => {
 
 }
 
-main().catch( e => console.error( e ) );
+main()
+  .catch( e => p.log.error( e ) );
 ;
-
-/*
-import { TextPrompt, isCancel } from '@clack/core';
-
-const pp = new TextPrompt({
-  render() {
-    return `What's your name?\n${this.valueWithCursor}`;
-  },
-});
-
-pp.on('cursor', (key, value) => {
-  console.log('cursor', key, value )
-})
-const name = await pp.prompt();
-if (isCancel(name)) {
-  process.exit(0);
-}
-*/

@@ -2,18 +2,19 @@ import { fileURLToPath } from 'url';
 import path from 'node:path';
 import pc from 'picocolors';
 import * as p from '@clack/prompts';
-import { CopilotCliAgentExecutor, banner, runCommand, scanFolderAndImportPackage, CommandHistory, } from 'copilot-cli-core';
+import { CopilotCliAgentExecutor, banner, runCommand, scanFolderAndImportPackage, CommandHistory, } from '@bsorrentino/copilot-cli-core';
 import { NewCommandsCommandTool } from './new-command-command.js';
 import { textPrompt } from './prompt-text.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const main = async () => {
     // const _modules = await scanFolderAndImportPackage( path.join( __dirname, 'commands') );
-    const commandPath = process.env['COMMANDS_PATH'];
-    if (!commandPath) {
-        throw new Error("'COMMANDS_PATH' environment variable is not defined!");
+    let commandsPath = process.env['COMMANDS_PATH'];
+    if (!commandsPath) {
+        commandsPath = path.join(process.cwd(), 'commands');
+        p.log.warning(`'COMMANDS_PATH' environment variable is not defined! the commands path is set to ${commandsPath} by default`);
     }
-    const _modules = await scanFolderAndImportPackage(commandPath);
+    const _modules = await scanFolderAndImportPackage(commandsPath);
     const progress = p.spinner();
     const execContext = {
         history: new CommandHistory(),

@@ -2,13 +2,16 @@
   "name": "langchain-copilot-cli",
   "version": "1.4.0",
   "description": "",
-  "main": "dist/cjs/blessed-cli.js",
+  "private": "true",
   "workspaces": [
-    "packages/*"
+    "packages/core",
+    "packages/scaffold",
+    "packages/commands",
+    "packages/simple"
   ],
   "scripts": {
     "build": "npm run build --workspaces",
-    "start:simple": "npm run start -w simple-cli",
+    "start": "npm run start -w simple-cli",
     "build:termkit": "npm run build -w termkit-cli",
     "start:termkit": "npm run start -w termkit-cli",
     "build:scaffold": "npm run build -w copilot-cli-scaffold",
