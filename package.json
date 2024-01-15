@@ -3,7 +3,6 @@
   "version": "1.4.0",
   "description": "",
   "private": "true",
-  "bin": "node -r dotenv/config lib/simple-cli.js dotenv_config_path=../../.env",
   "workspaces": [
     "packages/core",
     "packages/scaffold",

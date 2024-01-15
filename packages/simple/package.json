@@ -11,6 +11,7 @@
   "homepage": "https://github.com/bsorrentino/copilot-cli-agent#readme",
   "license": "MIT",
   "main": "lib/simple-cli.js",
+  "bin": "lib/simple-cli.js",
   "directories": {
     "lib": "lib",
     "test": "__tests__"
@@ -33,7 +34,7 @@
   },
   "dependencies": {
     "@clack/prompts": "^0.7.0",
-    "copilot-cli-core": "*",
+    "@bsorrentino/copilot-cli-core": "*",
     "dotenv": "^16.3.1",
     "picocolors": "^1.0.0"
   },
