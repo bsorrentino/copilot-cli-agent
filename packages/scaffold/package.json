@@ -1,5 +1,5 @@
 {
-  "name": "copilot-cli-scaffold",
+  "name": "@bsorrentino/copilot-cli-scaffold",
   "version": "1.4.0",
   "description": "tool to scaffold a custom cli command",
   "author": "bsorrentino <bartolomeo.sorrentino@gmail.com> (http://soulsoftware-bsc.blogspot.it/)",

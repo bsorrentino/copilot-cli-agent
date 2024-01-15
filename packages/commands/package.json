@@ -1,5 +1,5 @@
 {
-  "name": "cli-commands",
+  "name": "@bsorrentino/cli-commands",
   "version": "1.4.0",
   "description": "cli command extensions",
   "private": true,
