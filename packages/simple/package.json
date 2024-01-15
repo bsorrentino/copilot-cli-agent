@@ -1,5 +1,5 @@
 {
-  "name": "simple-cli",
+  "name": "@bsorrentino/simple-cli",
   "version": "1.4.0",
   "description": "simple copilot ai implementation",
   "type": "module",
