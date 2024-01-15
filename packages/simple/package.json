@@ -1,6 +1,6 @@
 {
   "name": "@bsorrentino/simple-cli",
-  "version": "1.4.2-alpha.2",
+  "version": "1.4.2-alpha.3",
   "description": "simple copilot ai implementation",
   "type": "module",
   "keywords": [
@@ -38,8 +38,8 @@
     "@bsorrentino/copilot-cli-core": "*",
     "@bsorrentino/copilot-cli-scaffold": "*",
     "@clack/prompts": "^0.7.0",
-    "picocolors": "^1.0.0",
-    "is-unicode-supported": "2.0.0"
+    "is-unicode-supported": "2.0.0",
+    "picocolors": "^1.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.8.10"
