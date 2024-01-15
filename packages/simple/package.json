@@ -1,6 +1,6 @@
 {
   "name": "@bsorrentino/simple-cli",
-  "version": "1.4.1-alpha.0",
+  "version": "1.4.2-alpha.0",
   "description": "simple copilot ai implementation",
   "type": "module",
   "keywords": [
@@ -33,8 +33,8 @@
     "url": "https://github.com/bsorrentino/copilot-cli-agent/issues"
   },
   "dependencies": {
-    "@clack/prompts": "^0.7.0",
     "@bsorrentino/copilot-cli-core": "*",
+    "@clack/prompts": "^0.7.0",
     "dotenv": "^16.3.1",
     "picocolors": "^1.0.0"
   },
