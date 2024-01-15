@@ -2,7 +2,7 @@
   "name": "@bsorrentino/copilot-cli-core",
   "version": "1.4.0",
   "description": "copilot-cli core compoment ",
-  "type":"module",
+  "type": "module",
   "keywords": [
     "ai",
     "copilot",

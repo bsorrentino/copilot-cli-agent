@@ -32,10 +32,10 @@
     "url": "https://github.com/bsorrentino/copilot-cli-agent/issues"
   },
   "dependencies": {
-    "dotenv": "^16.3.1",
     "@clack/prompts": "^0.7.0",
-    "picocolors": "^1.0.0",
-    "copilot-cli-core": "*"
+    "copilot-cli-core": "*",
+    "dotenv": "^16.3.1",
+    "picocolors": "^1.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.8.10"
