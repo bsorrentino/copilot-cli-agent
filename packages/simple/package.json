@@ -12,7 +12,7 @@
   "license": "MIT",
   "main": "lib/simple-cli.js",
   "bin": {
-    "copilot-cli": "node lib/simple-cli.js"
+    "copilot-cli": "./main.mjs"
   },
   "directories": {
     "lib": "lib",
@@ -38,7 +38,8 @@
     "@bsorrentino/copilot-cli-core": "*",
     "@bsorrentino/copilot-cli-scaffold": "*",
     "@clack/prompts": "^0.7.0",
-    "picocolors": "^1.0.0"
+    "picocolors": "^1.0.0",
+    "is-unicode-supported": "2.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.8.10"
