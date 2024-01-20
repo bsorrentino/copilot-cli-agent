@@ -5,4 +5,4 @@ export declare class ZodSchemaGenerator {
     create(input: string): Promise<string>;
     update(input: string): Promise<string>;
 }
-export declare const generateZodSchema: () => ZodSchemaGenerator;
+export declare const generateZodSchema: (verbose?: boolean) => ZodSchemaGenerator;

@@ -5,6 +5,10 @@ import { StructuredTool } from "langchain/tools";
 import { z } from "zod";
 import * as path from 'node:path'
 import * as fs from 'node:fs/promises'
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const SaveFileSchema = z.object({
     name: z.string().describe("file name in Camel case"),
@@ -36,44 +40,9 @@ class SaveFileTool extends StructuredTool<typeof SaveFileSchema>  {
     }
 }
 
-const promptGenerateToolTemplateWithCommand =`
-  As my typescript assistant 
+const promptGenerateToolTemplateWithCommand = async () => 
+  await fs.readFile( path.join(__dirname, '..', 'prompt-generate-tool-ts.txt'), 'utf8' )
 
-  I need that you create a langchain command tool as a plugin for the copilot-cli-agent application.
-  To do that you must fill the typescript template below with the variables:
-  NAME = {name}
-  DESC = {desc}
-  SCHEMA = {schema}
-  COMMAND = {command}
-
-  before filling the template consider to transform <COMMAND> in a string matching the schema attribute with command parameters.
-
-  as example :
-  ls -la <path> must be translated into "ls -la {{arg.path}}" 
-
-  and finally save generated code into a file named "<NAME>.mts" at "{path}".
-
-  
-  // beging template
-  import {{ z }} from "zod";
-  import {{ CommandTool, expandTilde, runCommand }} from "copilot-cli-core";
-
-  <SCHEMA>;
-
-  class "Camel Case of <NAME>"Tool extends CommandTool<typeof schema> {{
-      name = "Snake case of <NAME>";
-      description = "<DESC>";
-      schema = schema;
-      
-      async _call(arg: z.output<typeof schema>) {{
-
-          const res = await runCommand( <command>, this.execContext )
-          return this.name +  'completed ' + res;
-      }}
-  }}
-  export default new "Camel case of <NAME>"Tool();
-  // end template
-  `
 export const generateToolClass = async ( args:{
     name: string, 
     desc:string, 
@@ -104,7 +73,7 @@ export const generateToolClass = async ( args:{
     // We can construct an LLMChain from a PromptTemplate and an LLM.
     
     const template = PromptTemplate.fromTemplate(
-      promptGenerateToolTemplateWithCommand
+      await promptGenerateToolTemplateWithCommand()
     );
     
     const prompt = await template.format(args)

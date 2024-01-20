@@ -43,6 +43,19 @@ export async function main() {
     },
   });
 
+  const askForconfirmSchema = async (schema:string|null) => {
+    if( !schema ) return false
+
+    return await p.confirm({
+      message:
+       `${pc.underline('zod schema')}:
+  
+       ${pc.italic(schema)}
+  
+      ${pc.green('Do you confirm schema above?')}`,
+    });
+  }
+
   const commandPrompt = () => {
     
     p.note( 
@@ -82,38 +95,31 @@ export async function main() {
   
   // console.debug(group.name, group.desc );
 
-  let schemaCode:string|null  = null;
-
   let schemaGenerator:ZodSchemaGenerator
 
   spinner.start( pc.magenta('generating schema') );
 
   try {
-    schemaGenerator = generateZodSchema()
-
-    schemaCode  = await schemaGenerator.create( group.schema );
-    if( !schemaCode ) {
-      throw `problem generating a schema!`
-    }
+    schemaGenerator = generateZodSchema( /* verbose true */)
   }
   catch( e ) {
-    console.error( 'schema generation error', e );
+    console.error( 'cannot create schema generator', e );
     process.exit(-1)
   }
+  
+  let schemaCode:string|null  = null;
+
+  try {
+    schemaCode  = await schemaGenerator.create( group.schema );
+  }
+  catch( e:any ) {
+    p.log.error( e.message  )
+    schemaCode = null
+  }
   finally {
-    spinner.stop()
+    spinner.stop();
   }
 
-  const askForconfirmSchema = async (code:string ) => 
-    await p.confirm({
-      message:
-       `${pc.underline('zod schema')}:
-  
-       ${pc.italic(code)}
-  
-      ${pc.green('Do you confirm schema above?')}`,
-    });
-  
   let schemaConfirm: boolean | symbol = false;
 
   while( !(schemaConfirm = await askForconfirmSchema(schemaCode)) ) {
@@ -136,17 +142,13 @@ export async function main() {
 
     try {
       schemaCode  = await schemaGenerator.update( schemaDescUpdatePrompt );
-      if( !schemaCode ) {
-        console.warn( `problem generating a schema!`)
-        process.exit(0)
-      }  
     }
-    catch( e ) {
-      console.error( 'schema update error', e );
-      process.exit(-1)
-    }  
+    catch( e:any ) {
+      p.log.error( e.message );
+      schemaCode = null
+    }
     finally {
-      spinner.stop()
+      spinner.stop();
     }
   }
 
@@ -160,7 +162,7 @@ export async function main() {
 
     const tool  = await generateToolClass( { 
       ...group, 
-      schema: schemaCode, 
+      schema: schemaCode!, 
       path: path.join(process.cwd(), '..', 'commands', 'src' ) } );
   
   }

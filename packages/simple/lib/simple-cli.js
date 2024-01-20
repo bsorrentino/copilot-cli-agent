@@ -77,7 +77,7 @@ const main = async () => {
         });
         prompt.on('submit', cmd => {
             execContext.history.push(cmd);
-            console.log(execContext.history.current);
+            // console.log( execContext.history.current )
         });
         const input = await prompt.prompt();
         if (p.isCancel(input)) {
@@ -100,22 +100,6 @@ const main = async () => {
         }
     } while (true);
 };
-main().catch(e => console.error(e));
+main()
+    .catch(e => p.log.error(e));
 ;
-/*
-import { TextPrompt, isCancel } from '@clack/core';
-
-const pp = new TextPrompt({
-  render() {
-    return `What's your name?\n${this.valueWithCursor}`;
-  },
-});
-
-pp.on('cursor', (key, value) => {
-  console.log('cursor', key, value )
-})
-const name = await pp.prompt();
-if (isCancel(name)) {
-  process.exit(0);
-}
-*/

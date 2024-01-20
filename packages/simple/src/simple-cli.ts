@@ -98,14 +98,13 @@ const main = async () => {
             prompt.value = execContext.history.current
             prompt.valueWithCursor = prompt.value  
           }
-
           break
       }
       
     })
     prompt.on('submit', cmd => {
       execContext.history.push( cmd )
-      console.log( execContext.history.current )
+      // console.log( execContext.history.current )
     })
 
     const input = await prompt.prompt();

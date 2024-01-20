@@ -33,6 +33,17 @@ export async function main() {
                 return `Value is required!`;
         },
     });
+    const askForconfirmSchema = async (schema) => {
+        if (!schema)
+            return false;
+        return await p.confirm({
+            message: `${pc.underline('zod schema')}:
+  
+       ${pc.italic(schema)}
+  
+      ${pc.green('Do you confirm schema above?')}`,
+        });
+    };
     const commandPrompt = () => {
         p.note(`
       to describe the command use notation <arg name> to reference arguments in the schema.
@@ -63,30 +74,26 @@ export async function main() {
         },
     });
     // console.debug(group.name, group.desc );
-    let schemaCode = null;
     let schemaGenerator;
     spinner.start(pc.magenta('generating schema'));
     try {
-        schemaGenerator = generateZodSchema();
-        schemaCode = await schemaGenerator.create(group.schema);
-        if (!schemaCode) {
-            throw `problem generating a schema!`;
-        }
+        schemaGenerator = generateZodSchema( /* verbose true */);
     }
     catch (e) {
-        console.error('schema generation error', e);
+        console.error('cannot create schema generator', e);
         process.exit(-1);
+    }
+    let schemaCode = null;
+    try {
+        schemaCode = await schemaGenerator.create(group.schema);
+    }
+    catch (e) {
+        p.log.error(e.message);
+        schemaCode = null;
     }
     finally {
         spinner.stop();
     }
-    const askForconfirmSchema = async (code) => await p.confirm({
-        message: `${pc.underline('zod schema')}:
-  
-       ${pc.italic(code)}
-  
-      ${pc.green('Do you confirm schema above?')}`,
-    });
     let schemaConfirm = false;
     while (!(schemaConfirm = await askForconfirmSchema(schemaCode))) {
         const schemaDescUpdatePrompt = await p.text({
@@ -105,14 +112,10 @@ export async function main() {
         spinner.start(pc.magenta('updating schema'));
         try {
             schemaCode = await schemaGenerator.update(schemaDescUpdatePrompt);
-            if (!schemaCode) {
-                console.warn(`problem generating a schema!`);
-                process.exit(0);
-            }
         }
         catch (e) {
-            console.error('schema update error', e);
-            process.exit(-1);
+            p.log.error(e.message);
+            schemaCode = null;
         }
         finally {
             spinner.stop();
