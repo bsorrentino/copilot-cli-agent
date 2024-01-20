@@ -16,6 +16,7 @@ export declare class CommandHistory {
     push(cmd: string): CommandHistory;
     moveBack(): CommandHistory;
     moveNext(): CommandHistory;
+    moveLast(): CommandHistory;
     get isLast(): boolean;
     get current(): string | undefined;
     get isEmpty(): boolean;

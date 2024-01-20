@@ -13,30 +13,34 @@ import { ListCommandsCommandTool } from './list-commands-command.js';
 ;
 export class CommandHistory {
     #history = new Array();
-    #index;
+    #cursor;
     push(cmd) {
-        this.#index = this.#history.length;
+        this.#cursor = this.#history.length;
         this.#history.push(cmd);
         return this;
     }
     moveBack() {
-        if (this.#index !== undefined && this.#index > 0) {
-            this.#index--;
+        if (this.#cursor !== undefined && this.#cursor > 0) {
+            this.#cursor--;
         }
         return this;
     }
     moveNext() {
-        if (this.#index !== undefined && this.#index < this.#history.length - 1) {
-            this.#index++;
+        if (this.#cursor !== undefined && this.#cursor < this.#history.length - 1) {
+            this.#cursor++;
         }
         return this;
     }
+    moveLast() {
+        this.#cursor = this.#history.length - 1;
+        return this;
+    }
     get isLast() {
-        return this.#index === this.#history.length - 1;
+        return this.#cursor === this.#history.length - 1;
     }
     get current() {
-        if (this.#index !== undefined)
-            return this.#history[this.#index];
+        if (this.#cursor !== undefined)
+            return this.#history[this.#cursor];
     }
     get isEmpty() {
         return this.#history.length === 0;

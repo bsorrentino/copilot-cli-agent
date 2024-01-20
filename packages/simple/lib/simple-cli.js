@@ -43,13 +43,14 @@ const main = async () => {
     ], execContext);
     const _banner = await banner(path.dirname(__dirname));
     p.intro(pc.green(_banner));
+    let historyUsed = false;
     do {
         const prompt = textPrompt({
             message: 'Which commands would you like me to execute? ',
             placeholder: 'input prompt',
             initialValue: '',
             validate(value) {
-                if (value.length === 0) {
+                if (!historyUsed && value.length === 0) {
                     return "Please input a command!";
                 }
             },
@@ -64,6 +65,7 @@ const main = async () => {
                     if (execContext.history.current) {
                         prompt.value = execContext.history.current;
                         prompt.valueWithCursor = prompt.value;
+                        historyUsed = true;
                     }
                     break;
                 case 'down':
@@ -71,13 +73,23 @@ const main = async () => {
                         execContext.history.moveNext();
                         prompt.value = execContext.history.current;
                         prompt.valueWithCursor = prompt.value;
+                        historyUsed = true;
+                    }
+                    else {
+                        historyUsed = false;
                     }
                     break;
             }
         });
         prompt.on('submit', cmd => {
-            execContext.history.push(cmd);
-            // console.log( execContext.history.current )
+            if (cmd === undefined && historyUsed && execContext.history.current) {
+                const readline = prompt.rl; // hack to update the prompt value
+                readline.write(execContext.history.current);
+                execContext.history.moveLast();
+            }
+            else {
+                execContext.history.push(cmd);
+            }
         });
         const input = await prompt.prompt();
         if (p.isCancel(input)) {

@@ -15,6 +15,8 @@ import {
 import { NewCommandsCommandTool } from './new-command-command.js';
 import { textPrompt } from './prompt-text.js'
 
+import { ReadLine } from 'node:readline'
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -67,6 +69,8 @@ const main = async () => {
 
   p.intro( pc.green(_banner));
   
+  let historyUsed = false;
+
   do {
 
     const prompt = textPrompt({
@@ -74,8 +78,8 @@ const main = async () => {
       placeholder: 'input prompt',
       initialValue: '',
       validate(value) { 
-        if( value.length === 0 ) {
-          return "Please input a command!"
+        if( !historyUsed && value.length === 0 ) {
+           return "Please input a command!"
         }
       },
     })
@@ -89,7 +93,8 @@ const main = async () => {
           execContext.history.moveBack()
           if( execContext.history.current ) {
             prompt.value = execContext.history.current
-            prompt.valueWithCursor = prompt.value
+            prompt.valueWithCursor = prompt.value     
+            historyUsed = true      
           }
           break
         case 'down':
@@ -97,14 +102,28 @@ const main = async () => {
             execContext.history.moveNext()
             prompt.value = execContext.history.current
             prompt.valueWithCursor = prompt.value  
+            historyUsed = true     
+          }
+          else {
+            historyUsed = false     
           }
           break
       }
       
     })
     prompt.on('submit', cmd => {
-      execContext.history.push( cmd )
-      // console.log( execContext.history.current )
+      
+      if( cmd === undefined && historyUsed && execContext.history.current ) {
+
+        const readline = (<any>prompt).rl as ReadLine // hack to update the prompt value
+        readline.write( execContext.history.current )
+        execContext.history.moveLast()
+      }
+      else {
+        execContext.history.push( cmd )
+      }
+
+      
     })
 
     const input = await prompt.prompt();
