@@ -12,7 +12,7 @@ const main = async () => {
     let commandsPath = process.env['COMMANDS_PATH'];
     if (!commandsPath) {
         commandsPath = path.join(process.cwd(), 'commands');
-        p.log.warning(`'COMMANDS_PATH' environment variable is not defined! the commands path is set to ${commandsPath} by default`);
+        p.log.warning(`'COMMANDS_PATH' environment variable is not defined!\nIt is set to '${commandsPath}' by default`);
     }
     const _modules = await scanFolderAndImportPackage(commandsPath);
     const progress = p.spinner();
@@ -37,10 +37,17 @@ const main = async () => {
         },
         setProgress: (message) => progress.message(message),
     };
-    const executor = await CopilotCliAgentExecutor.create([
-        new NewCommandsCommandTool(progress),
-        ..._modules
-    ], execContext);
+    let executor;
+    try {
+        executor = await CopilotCliAgentExecutor.create([
+            new NewCommandsCommandTool(progress),
+            ..._modules
+        ], execContext);
+    }
+    catch (e) {
+        p.log.error(e.message);
+        process.exit(-1);
+    }
     const _banner = await banner(path.dirname(__dirname));
     p.intro(pc.green(_banner));
     let historyUsed = false;
@@ -50,7 +57,7 @@ const main = async () => {
             placeholder: 'input prompt',
             initialValue: '',
             validate(value) {
-                if (!historyUsed && value.length === 0) {
+                if (!historyUsed && value.trim().length === 0) {
                     return "Please input a command!";
                 }
             },
@@ -90,9 +97,9 @@ const main = async () => {
                 }
             }
             historyUsed = false;
-            for (const cmd of execContext.history) {
-                p.log.error(`[${cmd}]`);
-            }
+            // for( const cmd of execContext.history ) {
+            //   p.log.message(`[${cmd}]`)
+            // }
         });
         const input = await prompt.prompt();
         if (p.isCancel(input)) {
@@ -115,6 +122,4 @@ const main = async () => {
         }
     } while (true);
 };
-main()
-    .catch(e => p.log.error(e));
-;
+main();

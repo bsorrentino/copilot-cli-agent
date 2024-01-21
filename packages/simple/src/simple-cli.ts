@@ -20,6 +20,7 @@ import { ReadLine } from 'node:readline'
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+
 const main = async () => {
  
   // const _modules = await scanFolderAndImportPackage( path.join( __dirname, 'commands') );
@@ -27,7 +28,7 @@ const main = async () => {
   let commandsPath = process.env['COMMANDS_PATH'];
   if(!commandsPath ) {
     commandsPath = path.join(process.cwd(), 'commands')
-    p.log.warning(`'COMMANDS_PATH' environment variable is not defined! the commands path is set to ${commandsPath} by default` )
+    p.log.warning(`'COMMANDS_PATH' environment variable is not defined!\nIt is set to '${commandsPath}' by default` )
   }
   const _modules = await scanFolderAndImportPackage( commandsPath );
   
@@ -60,10 +61,18 @@ const main = async () => {
     
   }
   
-  const executor = await CopilotCliAgentExecutor.create([ 
+  let executor!:CopilotCliAgentExecutor;
+  
+  try {
+    executor = await CopilotCliAgentExecutor.create([ 
           new NewCommandsCommandTool(progress), 
           ..._modules
         ], execContext );
+  }
+  catch( e:any ) {
+    p.log.error( e.message )
+    process.exit( -1 )
+  }
 
   const _banner = await banner( path.dirname(__dirname) );
 
@@ -157,5 +166,3 @@ const main = async () => {
 }
 
 main()
-  .catch( e => p.log.error( e ) );
-;
