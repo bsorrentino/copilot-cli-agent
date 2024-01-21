@@ -82,13 +82,16 @@ const main = async () => {
             }
         });
         prompt.on('submit', cmd => {
-            if (cmd === undefined && historyUsed && execContext.history.current) {
-                const readline = prompt.rl; // hack to update the prompt value
-                readline.write(execContext.history.current);
-                execContext.history.moveLast();
+            if (historyUsed) {
+                if (!cmd && execContext.history.current) {
+                    const readline = prompt.rl; // hack to update the prompt value
+                    readline.write(execContext.history.current);
+                    execContext.history.moveLast();
+                }
             }
-            else {
-                execContext.history.push(cmd);
+            historyUsed = false;
+            for (const cmd of execContext.history) {
+                p.log.error(`[${cmd}]`);
             }
         });
         const input = await prompt.prompt();

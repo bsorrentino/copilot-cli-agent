@@ -78,7 +78,7 @@ const main = async () => {
       placeholder: 'input prompt',
       initialValue: '',
       validate(value) { 
-        if( !historyUsed && value.length === 0 ) {
+        if( !historyUsed && value.trim().length === 0 ) {
            return "Please input a command!"
         }
       },
@@ -113,16 +113,17 @@ const main = async () => {
     })
     prompt.on('submit', cmd => {
       
-      if( cmd === undefined && historyUsed && execContext.history.current ) {
-
-        const readline = (<any>prompt).rl as ReadLine // hack to update the prompt value
-        readline.write( execContext.history.current )
-        execContext.history.moveLast()
+      if( historyUsed ) {
+        if( !cmd && execContext.history.current ) {
+          const readline = (<any>prompt).rl as ReadLine // hack to update the prompt value
+          readline.write( execContext.history.current )
+          execContext.history.moveLast()
+        }
       }
-      else {
-        execContext.history.push( cmd )
-      }
-
+      historyUsed = false
+      // for( const cmd of execContext.history ) {
+      //   p.log.message(`[${cmd}]`)
+      // }
       
     })
 
@@ -134,15 +135,12 @@ const main = async () => {
       //process.exit(0)
     }
   
-    
     try {
      
       progress.start();
       const inputMatch = /^\s*[#?]\s*(.+)/.exec(input)
       if( inputMatch ) {
-
         await executor.run( inputMatch[1] );
-
       }
       else {
         await runCommand( input, execContext )
