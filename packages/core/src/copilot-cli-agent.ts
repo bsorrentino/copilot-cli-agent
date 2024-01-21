@@ -70,6 +70,12 @@ export class CommandHistory {
   get isEmpty():boolean {
     return this.#history.length === 0;
   }
+
+  *[Symbol.iterator](): Generator<string, void, unknown> {
+      for( let item of this.#history) {    
+        yield item
+      }
+  }
 }
 
 /**

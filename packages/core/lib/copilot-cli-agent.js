@@ -45,6 +45,11 @@ export class CommandHistory {
     get isEmpty() {
         return this.#history.length === 0;
     }
+    *[Symbol.iterator]() {
+        for (let item of this.#history) {
+            yield item;
+        }
+    }
 }
 /**
  * Abstract base class for command tools. Extends StructuredTool and adds an optional ExecutionContext property.

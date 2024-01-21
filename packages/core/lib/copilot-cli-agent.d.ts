@@ -20,6 +20,7 @@ export declare class CommandHistory {
     get isLast(): boolean;
     get current(): string | undefined;
     get isEmpty(): boolean;
+    [Symbol.iterator](): Generator<string, void, unknown>;
 }
 /**
  * Abstract base class for command tools. Extends StructuredTool and adds an optional ExecutionContext property.
