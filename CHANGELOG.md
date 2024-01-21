@@ -1,6 +1,24 @@
 # Changelog
 
 
+"name: v1.5.1" is a release tag
+
+## [v1.5.1](https://github.com/bsorrentino/pdf-tools/releases/tag/v1.5.1) (2024-01-21)
+
+
+
+### Documentation
+
+ -  update changelog ([4fba2879d346065](https://github.com/bsorrentino/pdf-tools/commit/4fba2879d346065f6ff010141e9a010605d5c24d))
+
+
+### Refactor
+
+ -  improve error messages ([c7f654251d6c34a](https://github.com/bsorrentino/pdf-tools/commit/c7f654251d6c34aa5c2bd025948e6539efed396a))
+
+
+
+
 "name: v1.5.0" is a release tag
 
 ## [v1.5.0](https://github.com/bsorrentino/pdf-tools/releases/tag/v1.5.0) (2024-01-21)
