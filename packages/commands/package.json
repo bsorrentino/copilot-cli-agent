@@ -24,7 +24,7 @@
     "url": "https://github.com/bsorrentino/copilot-cli-agent/issues"
   },
   "dependencies": {
-    "copilot-cli-core": "*",
-    "langchain": "^0.0.178"
+    "@bsorrentino/copilot-cli-core": "*",
+    "langchain": "^0.1.21"
   }
 }

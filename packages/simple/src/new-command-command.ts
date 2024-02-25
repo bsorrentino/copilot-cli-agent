@@ -1,5 +1,5 @@
 import { Tool } from "langchain/tools";
-import { CommandTool, ExecutionContext, runCommand } from "copilot-cli-core";
+import { CommandTool, ExecutionContext, runCommand } from "@bsorrentino/copilot-cli-core";
 import { CallbackManagerForToolRun } from "langchain/callbacks";
 import { main } from '@bsorrentino/copilot-cli-scaffold'
 
