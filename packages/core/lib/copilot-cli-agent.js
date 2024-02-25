@@ -4,12 +4,11 @@ import fs from 'node:fs';
 import { spawn } from 'node:child_process';
 import { readdir, stat, readFile } from 'node:fs/promises';
 import { StructuredTool } from 'langchain/tools';
-import { initializeAgentExecutorWithOptions } from "langchain/agents";
 import { ChatOpenAI } from 'langchain/chat_models/openai';
-import { PromptTemplate } from 'langchain/prompts';
 import { CopilotCliCallbackHandler } from './copilot-cli-callback.js';
 import { SystemCommandTool } from './system-command.js';
 import { ListCommandsCommandTool } from './list-commands-command.js';
+import { initializeCLIAgentExecutor } from './agent-executor.js';
 ;
 export class CommandHistory {
     #history = new Array();
@@ -188,7 +187,7 @@ export const runCommand = async (arg, ctx) => {
 };
 export class CopilotCliAgentExecutor {
     static async create(commandModules, execContext) {
-        const model = new ChatOpenAI({
+        const llm = new ChatOpenAI({
             // modelName: "gpt-4",
             modelName: "gpt-3.5-turbo-0613",
             // stop: ["end", "stop", "quit"],
@@ -212,27 +211,15 @@ export class CopilotCliAgentExecutor {
             new ListCommandsCommandTool(commandModules, execContext),
             ...commandModules
         ];
-        const agent = await initializeAgentExecutorWithOptions(tools, model, {
-            agentType: "openai-functions",
-            verbose: false,
-            handleParsingErrors: (e) => {
-                execContext?.log(`HANDLE ERROR ${e}`);
-                return "there is an error!";
-            }
-        });
+        const agent = await initializeCLIAgentExecutor({ tools, llm });
         return new CopilotCliAgentExecutor(agent);
     }
     agent;
-    mainPromptTemplate = PromptTemplate.fromTemplate(`You are my command line executor assistant, limit your response to the word 'completed' and assume that we are on {platform} operative system:
-  
-    Execute:  {input}
-    `);
     constructor(agent) {
         this.agent = agent;
     }
     async run(input) {
-        const prompt = await this.mainPromptTemplate.format({ platform: os.platform(), input: input });
-        const result = await this.agent.run(prompt);
+        const result = await this.agent.invoke({ input });
         return result;
     }
 }

@@ -32,7 +32,8 @@
     "url": "https://github.com/bsorrentino/copilot-cli-agent/issues"
   },
   "dependencies": {
-    "langchain": "^0.0.178",
+    "@langchain/langgraph": "^0.0.9",
+    "langchain": "^0.1.21",
     "zod": "^3.22.4"
   },
   "devDependencies": {

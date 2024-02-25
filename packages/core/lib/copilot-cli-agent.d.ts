@@ -74,7 +74,6 @@ export declare const runCommand: (arg: RunCommandArg | string, ctx?: ExecutionCo
 export declare class CopilotCliAgentExecutor {
     static create(commandModules: StructuredTool[], execContext?: ExecutionContext): Promise<CopilotCliAgentExecutor>;
     private agent;
-    private mainPromptTemplate;
     private constructor();
-    run(input: string): Promise<string>;
+    run(input: string): Promise<any>;
 }
