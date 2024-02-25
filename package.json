@@ -17,7 +17,6 @@
     "build:scaffold": "npm run build -w copilot-cli-scaffold",
     "start:scaffold": "npm run start -w copilot-cli-scaffold",
     "changelog": "git-changelog-command-line -of CHANGELOG.md"
-
   },
   "keywords": [],
   "author": "bsorrentino <bartolomeo.sorrentino@gmail.com> (http://soulsoftware-bsc.blogspot.it/)",
@@ -27,9 +26,8 @@
   },
   "devDependencies": {
     "@types/node": "^20.8.9",
-    "git-changelog-command-line": "^1.109.1",
-    "lerna": "^7.4.2",
-    "tsx": "^3.14.0",
-    "typescript": "^5.2.2"
+    "lerna": "^8.1.2",
+    "tsx": "^4.7.1",
+    "typescript": "^5.3.3"
   }
 }
