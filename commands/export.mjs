@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CommandTool } from "copilot-cli-core";
+import { CommandTool } from "@bsorrentino/copilot-cli-core";
 const ExportSchema = z.object({
     solution: z.string().describe("the remote solution name")
 });

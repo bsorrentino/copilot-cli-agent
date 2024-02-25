@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CommandTool } from "copilot-cli-core";
+import { CommandTool } from "@bsorrentino/copilot-cli-core";
 const ImportSchema = z.object({
     path: z.string()
         .describe("the solution path"),

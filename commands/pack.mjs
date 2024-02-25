@@ -2,7 +2,7 @@ import { z } from "zod";
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import pc from 'picocolors';
-import { CommandTool, expandTilde, runCommand } from "copilot-cli-core";
+import { CommandTool, expandTilde, runCommand } from "@bsorrentino/copilot-cli-core";
 /**
  * read tag value `<Version>1.0.0.1</Version>` and  <UniqueName>development</UniqueName> in solution.xml
  *
