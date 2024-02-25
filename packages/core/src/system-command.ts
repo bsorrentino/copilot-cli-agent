@@ -1,6 +1,6 @@
 import { Tool } from "langchain/tools";
 import { ExecutionContext, runCommand } from "./copilot-cli-agent.js";
-import { CallbackManagerForToolRun } from "langchain/callbacks";
+import { CallbackManagerForToolRun } from "@langchain/core/callbacks/manager";
 
 
 /**

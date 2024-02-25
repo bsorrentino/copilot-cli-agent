@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@bsorrentino/copilot-cli-core": "*",
+    "@langchain/community": "^0.0.32",
     "langchain": "^0.1.21"
   }
 }

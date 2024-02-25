@@ -35,6 +35,6 @@
   "dependencies": {
     "@types/blessed": "^0.1.24",
     "blessed": "^0.1.81",
-    "copilot-cli-core": "*"
+    "@bsorrentino/copilot-cli-core": "*"
   }
 }

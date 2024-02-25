@@ -1,5 +1,5 @@
-import { ChatOpenAI } from "langchain/chat_models/openai";
-import { PromptTemplate } from "langchain/prompts";
+import { ChatOpenAI } from "@langchain/openai";
+import { PromptTemplate } from "@langchain/core/prompts";
 import { initializeAgentExecutorWithOptions } from "langchain/agents";
 import { StructuredTool } from "langchain/tools";
 import { z } from "zod";

@@ -28,6 +28,8 @@
   },
   "dependencies": {
     "@clack/prompts": "^0.7.0",
+    "@langchain/community": "^0.0.32",
+    "@langchain/openai": "^0.0.14",
     "langchain": "^0.1.21",
     "picocolors": "^1.0.0",
     "zod": "^3.22.4"

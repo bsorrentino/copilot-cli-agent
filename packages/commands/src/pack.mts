@@ -1,4 +1,4 @@
-import { CallbackManagerForToolRun } from "langchain/callbacks";
+import { CallbackManagerForToolRun } from "@langchain/core/callbacks/manager";
 import { z } from "zod";
 import path from 'node:path'
 import fs from 'node:fs/promises'

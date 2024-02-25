@@ -5,7 +5,7 @@ import { spawn } from 'node:child_process';
 import { readdir, stat, readFile } from 'node:fs/promises'
 import { StructuredTool } from 'langchain/tools';
 import { z } from 'zod';
-import { ChatOpenAI } from 'langchain/chat_models/openai';
+import { ChatOpenAI } from '@langchain/openai';
 import { CopilotCliCallbackHandler } from './copilot-cli-callback.js';
 import { SystemCommandTool } from './system-command.js';
 import { ListCommandsCommandTool } from './list-commands-command.js';

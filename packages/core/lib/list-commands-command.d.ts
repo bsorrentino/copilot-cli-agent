@@ -1,6 +1,6 @@
 import { StructuredTool, Tool } from "langchain/tools";
 import { ExecutionContext } from "./copilot-cli-agent.js";
-import { CallbackManagerForToolRun } from "langchain/callbacks";
+import { CallbackManagerForToolRun } from "@langchain/core/callbacks/manager";
 export declare class ListCommandsCommandTool extends Tool {
     private commandModules;
     private execContext?;

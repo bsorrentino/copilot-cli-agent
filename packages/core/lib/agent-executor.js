@@ -4,7 +4,8 @@ import { ToolExecutor } from "@langchain/langgraph/prebuilt";
 import { RunnableLambda } from "@langchain/core/runnables";
 import { END, StateGraph } from "@langchain/langgraph";
 import os from 'node:os';
-import { inspect } from 'node:util';
+const asAgentFinish = (x) => (x && "returnValues" in x) ? x : undefined;
+const asAgentAction = (x) => !asAgentFinish(x) ? x : undefined;
 export async function initializeCLIAgentExecutor(options) {
     const agentState = {
         input: {
@@ -32,28 +33,29 @@ export async function initializeCLIAgentExecutor(options) {
     // Define logic that will be used to determine which conditional edge to go down
     const shouldContinue = (data) => {
         const { agentOutcome } = data;
-        console.log("shouldContinue agentOutcome", inspect(agentOutcome, { depth: 5 }));
-        if (agentOutcome && "returnValues" in agentOutcome) {
+        // console.debug("shouldContinue agentOutcome", inspect(agentOutcome,{depth:5}) );
+        if (asAgentFinish(agentOutcome)) {
             return "end";
         }
         return "continue";
     };
     const runAgent = async (data, config) => {
         const agentOutcome = await agentRunnable.invoke(data, config);
-        console.log("runAgent agentOutcome", inspect(agentOutcome, { depth: 5 }));
+        // console.debug("runAgent agentOutcome", inspect(agentOutcome,{depth:5}));
         return {
             agentOutcome,
         };
     };
     const executeTools = async (data, config) => {
         const { agentOutcome } = data;
-        console.log("executeTools agentOutcome", inspect(agentOutcome, { depth: 5 }));
-        if (!agentOutcome || "returnValues" in agentOutcome) {
+        // console.debug("executeTools agentOutcome", inspect(agentOutcome,{depth:5}));
+        const action = asAgentAction(agentOutcome);
+        if (!action) {
             throw new Error("Agent has not been run yet");
         }
         const output = await toolExecutor.invoke(agentOutcome, config);
         return {
-            steps: [{ action: agentOutcome, observation: JSON.stringify(output) }]
+            steps: [{ action, observation: output }]
         };
     };
     // Define a new graph
