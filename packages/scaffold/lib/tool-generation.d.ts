@@ -6,4 +6,4 @@ export declare const generateToolClass: (args: {
     schema: string;
     command: string;
     path: string;
-}) => Promise<string>;
+}) => Promise<any>;

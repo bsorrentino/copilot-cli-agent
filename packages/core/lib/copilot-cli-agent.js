@@ -3,7 +3,7 @@ import os from 'node:os';
 import fs from 'node:fs';
 import { spawn } from 'node:child_process';
 import { readdir, stat, readFile } from 'node:fs/promises';
-import { StructuredTool } from 'langchain/tools';
+import { StructuredTool } from '@langchain/core/tools';
 import { ChatOpenAI } from '@langchain/openai';
 import { CopilotCliCallbackHandler } from './copilot-cli-callback.js';
 import { SystemCommandTool } from './system-command.js';

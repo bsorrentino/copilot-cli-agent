@@ -1,4 +1,4 @@
-import { LLMResult } from "langchain/schema";
+import { LLMResult } from "@langchain/core/outputs";
 import { ExecutionContext } from "./copilot-cli-agent.js";
 import { BaseCallbackHandler } from "@langchain/core/callbacks/base";
 /**
