@@ -8,7 +8,7 @@ import { ToolExecutor } from "@langchain/langgraph/prebuilt";
 import type { RunnableConfig } from "@langchain/core/runnables";
 import { RunnableLambda } from "@langchain/core/runnables";
 import { END, StateGraph } from "@langchain/langgraph";
-import { Pregel } from "@langchain/langgraph/pregel";
+import { Runnable } from "@langchain/core/runnables";
 
 import os from 'node:os'
 import { inspect } from 'node:util'
@@ -27,8 +27,7 @@ const asAgentAction = (x?: AgentAction | AgentFinish  ):AgentAction|undefined =>
      !asAgentFinish(x) ? x as AgentAction : undefined;
 
 
-export async function initializeCLIAgentExecutor(options: Pick<CreateOpenAIFunctionsAgentParams, "llm" | "tools">): Promise<Pregel> {
-
+export async function initializeCLIAgentExecutor(options: Pick<CreateOpenAIFunctionsAgentParams, "llm" | "tools">): Promise<Runnable<{input: string}>> {
 
     const agentState = {
         input: {

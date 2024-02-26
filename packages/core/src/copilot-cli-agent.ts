@@ -3,15 +3,14 @@ import os from 'node:os'
 import fs from 'node:fs'
 import { spawn } from 'node:child_process';
 import { readdir, stat, readFile } from 'node:fs/promises'
-import { StructuredTool } from 'langchain/tools';
+import { StructuredTool } from '@langchain/core/tools';
 import { z } from 'zod';
 import { ChatOpenAI } from '@langchain/openai';
 import { CopilotCliCallbackHandler } from './copilot-cli-callback.js';
 import { SystemCommandTool } from './system-command.js';
 import { ListCommandsCommandTool } from './list-commands-command.js';
 import { initializeCLIAgentExecutor } from './agent-executor.js';
-import { Pregel } from '@langchain/langgraph/pregel';
-import { HumanMessage } from "@langchain/core/messages";
+import { Runnable } from '@langchain/core/runnables';
 
 export type LogType = 'info' | 'warn' | 'error'; ;
 
@@ -286,9 +285,9 @@ export class CopilotCliAgentExecutor {
     return new CopilotCliAgentExecutor(agent);
   }
 
-  private agent: Pregel;
+  private agent: Runnable<{input: string }>;
 
-  private constructor(agent: Pregel) {
+  private constructor(agent: Runnable) {
     this.agent = agent;
   }
 
