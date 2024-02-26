@@ -1,11 +1,13 @@
 import { ChatOpenAI } from "@langchain/openai";
-import { PromptTemplate } from "@langchain/core/prompts";
-import {  initializeAgentExecutorWithOptions } from "langchain/agents";
-import { StructuredTool } from "langchain/tools";
+import { StructuredTool } from '@langchain/core/tools';
+import { ChatPromptTemplate, MessagesPlaceholder, SystemMessagePromptTemplate } from "@langchain/core/prompts";
+import { SystemMessage } from "@langchain/core/messages";
+
 import { z } from "zod";
 import * as path from 'node:path'
 import * as fs from 'node:fs/promises'
 import { fileURLToPath } from 'url';
+import { initializeToolAgentExecutor } from "./agent-executor.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,6 +17,7 @@ const SaveFileSchema = z.object({
     content: z.string().describe(" text file content"),
     outputPath: z.string().describe("file path").optional(),
   });
+
 class SaveFileTool extends StructuredTool<typeof SaveFileSchema>  {
     name ="save_file"
     description = "save file on local file system at path"
@@ -40,9 +43,6 @@ class SaveFileTool extends StructuredTool<typeof SaveFileSchema>  {
     }
 }
 
-const promptGenerateToolTemplateWithCommand = async () => 
-  await fs.readFile( path.join(__dirname, '..', 'prompt-generate-tool-ts.txt'), 'utf8' )
-
 export const generateToolClass = async ( args:{
     name: string, 
     desc:string, 
@@ -52,7 +52,7 @@ export const generateToolClass = async ( args:{
   }) => {
     
     
-    const model = new ChatOpenAI({
+    const llm = new ChatOpenAI({
       // modelName: "gpt-4",
       modelName: "gpt-3.5-turbo-0613",
       // stop: ["end", "stop", "quit"],
@@ -62,23 +62,20 @@ export const generateToolClass = async ( args:{
       temperature: 0
     });
     
+    const systemPromptTemplate = await fs.readFile( path.join(__dirname, '..', 'prompt-generate-tool-ts.txt'), 'utf8' ) 
+
+    const systemMessage = SystemMessagePromptTemplate.fromTemplate( systemPromptTemplate );
+
+    const prompt = ChatPromptTemplate.fromMessages([
+      await systemMessage.format(args),
+      new MessagesPlaceholder( 'agent_scratchpad')
+    ])
+
     const tools = [ new SaveFileTool() ] ;
     
-    const agent = await initializeAgentExecutorWithOptions( tools, model, {
-      agentType: "openai-functions",
-      verbose: false,
-      handleParsingErrors: (e:any) => "there is an error!"
-    });
-    
-    // We can construct an LLMChain from a PromptTemplate and an LLM.
-    
-    const template = PromptTemplate.fromTemplate(
-      await promptGenerateToolTemplateWithCommand()
-    );
-    
-    const prompt = await template.format(args)
-    
-    return await agent.run(prompt);
+    const agent = await initializeToolAgentExecutor( { prompt, tools, llm } );
+      
+    return await agent.invoke( { input: '' });
 
 }
 
