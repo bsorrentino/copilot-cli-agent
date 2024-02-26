@@ -1,6 +1,45 @@
 # Changelog
 
 
+
+## [v1.5.2-alpha.0](https://github.com/bsorrentino/pdf-tools/releases/tag/v1.5.2-alpha.0) (2024-02-26)
+
+### Features
+
+ *  update implementation with langgraph ([1de1adc586a45a5](https://github.com/bsorrentino/pdf-tools/commit/1de1adc586a45a5826f1d33433d326bf79ec5768))
+     > worn on #5
+   
+ *  replace  agentexecutor with langgraph implementation ([9bdfb91b2040ccb](https://github.com/bsorrentino/pdf-tools/commit/9bdfb91b2040ccb5bb8317afdde3da3b3b573424))
+     > work on #5
+   
+
+
+### Documentation
+
+ -  update changelog ([0cbcdb0f44d511d](https://github.com/bsorrentino/pdf-tools/commit/0cbcdb0f44d511da5dc07792dd5bb4bcdb68da81))
+
+
+### Refactor
+
+ -  update langchain packages ([0f48f000628f36c](https://github.com/bsorrentino/pdf-tools/commit/0f48f000628f36cd2b36893b15e6e117764d5b25))
+     > work on #5
+
+ -  update langchain package ([43c910c09f103bf](https://github.com/bsorrentino/pdf-tools/commit/43c910c09f103bfad1e50b66d9bee32e5a67714b))
+
+ -  update langchain package ([541cd320ab7e4ea](https://github.com/bsorrentino/pdf-tools/commit/541cd320ab7e4ea36600811544dce1478ae0cb30))
+     > work on #5
+
+ -  add namespace to copilot-cli-core import ([eea7d116c7e7306](https://github.com/bsorrentino/pdf-tools/commit/eea7d116c7e7306d891a814a48a28db51c893460))
+
+ -  add namespace to copilot-cli-core import ([47fe90407232b77](https://github.com/bsorrentino/pdf-tools/commit/47fe90407232b773f3745e9cee8968ca916d3f3f))
+
+
+### ALM 
+
+ -  upgrade deps ([80268b250f5ac87](https://github.com/bsorrentino/pdf-tools/commit/80268b250f5ac878dd68d6a8f10f9f0a8cb029a3))
+
+
+
 "name: v1.5.1" is a release tag
 
 ## [v1.5.1](https://github.com/bsorrentino/pdf-tools/releases/tag/v1.5.1) (2024-01-21)
