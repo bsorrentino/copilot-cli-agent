@@ -1,9 +1,9 @@
-import { CallbackManagerForToolRun } from "langchain/callbacks";
+import { CallbackManagerForToolRun } from "@langchain/core/callbacks/manager";
 import { z } from "zod";
 import path from 'node:path'
 import fs from 'node:fs/promises'
 import pc from 'picocolors'
-import { CommandTool, expandTilde, runCommand } from "copilot-cli-core";
+import { CommandTool, expandTilde, runCommand } from "@bsorrentino/copilot-cli-core";
 
 
 /**

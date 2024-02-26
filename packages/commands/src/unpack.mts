@@ -1,8 +1,8 @@
-import { CallbackManagerForToolRun } from "langchain/callbacks";
+import { CallbackManagerForToolRun } from "@langchain/core/callbacks/manager";
 import { z } from "zod";
 import path from 'node:path'
 
-import { CommandTool, expandTilde, runCommand } from "copilot-cli-core";
+import { CommandTool, expandTilde, runCommand } from "@bsorrentino/copilot-cli-core";
 
 /** 
  * Schema for the unpack tool arguments.

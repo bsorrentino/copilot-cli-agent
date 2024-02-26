@@ -36,6 +36,6 @@
   },
   "dependencies": {
     "@bsorrentino/terminal-kit": "3.0.1-build16",
-    "copilot-cli-core": "*"
+    "@bsorrentino/copilot-cli-core": "*"
   }
 }

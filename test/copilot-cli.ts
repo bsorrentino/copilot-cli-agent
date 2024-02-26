@@ -1,4 +1,4 @@
-import { ChatOpenAI } from "langchain/chat_models/openai";
+import { ChatOpenAI } from "@langchain/openai";
 import 'dotenv/config'
 import { DynamicTool } from "langchain/tools";
 import { Client as Hub } from 'langchainhub'

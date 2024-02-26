@@ -1,4 +1,4 @@
-import { Tool } from "langchain/tools";
+import { Tool } from "@langchain/core/tools";
 import { runCommand } from "./copilot-cli-agent.js";
 /**
  * SystemCommandTool is a Tool subclass that allows executing arbitrary

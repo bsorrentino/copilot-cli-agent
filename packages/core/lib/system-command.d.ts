@@ -1,6 +1,6 @@
-import { Tool } from "langchain/tools";
+import { Tool } from "@langchain/core/tools";
 import { ExecutionContext } from "./copilot-cli-agent.js";
-import { CallbackManagerForToolRun } from "langchain/callbacks";
+import { CallbackManagerForToolRun } from "@langchain/core/callbacks/manager";
 /**
  * SystemCommandTool is a Tool subclass that allows executing arbitrary
  * system commands. It takes a command string as input and executes it using

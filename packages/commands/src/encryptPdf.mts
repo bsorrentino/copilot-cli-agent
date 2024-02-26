@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CommandTool, expandTilde, runCommand } from "copilot-cli-core";
+import { CommandTool, expandTilde, runCommand } from "@bsorrentino/copilot-cli-core";
 
 const schema = z.object({
   pdfpath: z.string().describe("full pdf path"),

@@ -1,4 +1,4 @@
-import { Tool } from "langchain/tools";
+import { Tool } from "@langchain/core/tools";
 import { main } from '@bsorrentino/copilot-cli-scaffold';
 export class NewCommandsCommandTool extends Tool {
     progress;

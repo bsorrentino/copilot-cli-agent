@@ -3,14 +3,14 @@ import os from 'node:os'
 import fs from 'node:fs'
 import { spawn } from 'node:child_process';
 import { readdir, stat, readFile } from 'node:fs/promises'
-import { StructuredTool, Tool } from 'langchain/tools';
+import { StructuredTool } from '@langchain/core/tools';
 import { z } from 'zod';
-import { AgentExecutor, initializeAgentExecutorWithOptions } from "langchain/agents";
-import { ChatOpenAI } from 'langchain/chat_models/openai';
-import { PromptTemplate } from 'langchain/prompts';
+import { ChatOpenAI } from '@langchain/openai';
 import { CopilotCliCallbackHandler } from './copilot-cli-callback.js';
 import { SystemCommandTool } from './system-command.js';
 import { ListCommandsCommandTool } from './list-commands-command.js';
+import { initializeCLIAgentExecutor } from './agent-executor.js';
+import { Runnable } from '@langchain/core/runnables';
 
 export type LogType = 'info' | 'warn' | 'error'; ;
 
@@ -252,7 +252,7 @@ export class CopilotCliAgentExecutor {
 
   public static async create(commandModules: StructuredTool[], execContext?: ExecutionContext): Promise<CopilotCliAgentExecutor> {
 
-    const model = new ChatOpenAI({
+    const llm = new ChatOpenAI({
       // modelName: "gpt-4",
       modelName: "gpt-3.5-turbo-0613",
       // stop: ["end", "stop", "quit"],
@@ -280,36 +280,20 @@ export class CopilotCliAgentExecutor {
       ...commandModules
     ];
 
-    const agent = await initializeAgentExecutorWithOptions(tools, model, {
-      agentType: "openai-functions",
-      verbose: false,
-      handleParsingErrors: (e) => {
-
-        execContext?.log(`HANDLE ERROR ${e}`);
-        return "there is an error!"
-      }
-    });
+    const agent = await initializeCLIAgentExecutor( {tools, llm});
 
     return new CopilotCliAgentExecutor(agent);
   }
 
-  private agent: AgentExecutor;
+  private agent: Runnable<{input: string }>;
 
-  private mainPromptTemplate = PromptTemplate.fromTemplate(
-    `You are my command line executor assistant, limit your response to the word 'completed' and assume that we are on {platform} operative system:
-  
-    Execute:  {input}
-    ` 
-  );
-
-  private constructor(agent: AgentExecutor) {
+  private constructor(agent: Runnable) {
     this.agent = agent;
   }
 
   public async run(input: string) {
 
-    const prompt = await this.mainPromptTemplate.format({ platform: os.platform(), input: input })
-    const result = await this.agent.run(prompt);
+    const result = await this.agent.invoke({input});
     return result;
   }
 

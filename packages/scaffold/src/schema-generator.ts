@@ -1,8 +1,8 @@
-import { ChatOpenAI } from "langchain/chat_models/openai";
+import { ChatOpenAI } from "@langchain/openai";
 import { LLMChain } from "langchain/chains";
 import { BufferMemory } from "langchain/memory";
-import { ChatPromptTemplate, MessagesPlaceholder } from "langchain/prompts";
-import { StringOutputParser  } from "langchain/schema/output_parser";
+import { ChatPromptTemplate, MessagesPlaceholder } from "@langchain/core/prompts";
+import { StringOutputParser  } from "@langchain/core/output_parsers";
 import { RegexParser } from "langchain/output_parsers";
 import * as fs from "node:fs/promises";
 import path from "node:path";

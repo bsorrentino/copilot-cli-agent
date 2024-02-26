@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CommandTool, runCommand } from "copilot-cli-core";
+import { CommandTool, runCommand } from "@bsorrentino/copilot-cli-core";
 var GrayLevel;
 (function (GrayLevel) {
     GrayLevel["Four"] = "4";
