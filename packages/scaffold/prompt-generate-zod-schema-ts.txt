@@ -19,7 +19,7 @@ and the costraints:
 
 You MUST start to interact to the USER following the process below
 
-1. prome the provided input generate the typescript code for the schema or if there aren't enough informations generate an empty schema. 
+1. use the provided input to generate the typescript code for the schema or if there aren't enough informations generate an empty schema. 
 2. ask to the USER to confirm the generated code
 3. if USER doesn't confirm the generated code, ask for the properties information again otherwise return typescript code 
 

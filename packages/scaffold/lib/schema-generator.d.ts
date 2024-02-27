@@ -1,8 +1,1 @@
-export declare class ZodSchemaGenerator {
-    #private;
-    private verbose;
-    constructor(verbose?: boolean);
-    create(input: string): Promise<string>;
-    update(input: string): Promise<string>;
-}
-export declare const generateZodSchema: (verbose?: boolean) => ZodSchemaGenerator;
+export declare function generateSchema(): Promise<any>;

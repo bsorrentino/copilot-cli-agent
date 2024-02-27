@@ -1,13 +1,12 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { StructuredTool } from '@langchain/core/tools';
 import { ChatPromptTemplate, MessagesPlaceholder, SystemMessagePromptTemplate } from "@langchain/core/prompts";
-import { SystemMessage } from "@langchain/core/messages";
 
 import { z } from "zod";
 import * as path from 'node:path'
 import * as fs from 'node:fs/promises'
 import { fileURLToPath } from 'url';
-import { initializeToolAgentExecutor } from "./agent-executor.js";
+import { initializeToolAgentExecutor } from "./tool-generator-executor.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -73,9 +72,23 @@ export const generateToolClass = async ( args:{
 
     const tools = [ new SaveFileTool() ] ;
     
-    const agent = await initializeToolAgentExecutor( { prompt, tools, llm } );
+    const agent = await initializeToolAgentExecutor( { prompt, tools, llm }, args );
       
     return await agent.invoke( { input: '' });
 
 }
 
+
+if (process.argv[2] === '__TEST__') {
+
+  (async () => {
+    
+    await generateToolClass({
+      name: "Test1",
+      desc: "My Last test",
+      schema: 'z.object({\n    name: z.string().describe("the name"),\n});',
+      command: 'echo "hello command"',
+      path: path.join(process.cwd(), 'packages', 'commands')
+    })
+  })()
+}

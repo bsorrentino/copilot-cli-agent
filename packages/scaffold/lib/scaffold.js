@@ -1,8 +1,8 @@
 import * as p from '@clack/prompts';
 import pc from 'picocolors';
-import { generateZodSchema } from "./schema-generator.js";
-import { generateToolClass } from "./tool-generation.js";
 import * as path from "node:path";
+import { generateToolClass } from "./tool-generator.js";
+import { generateSchema } from './schema-generator.js';
 export async function main() {
     const spinner = p.spinner();
     p.intro(pc.yellow(`Let generate new custom command 🎬`));
@@ -19,15 +19,6 @@ export async function main() {
         message: pc.green('command description'),
         placeholder: 'meaningful command description helping AI reasoning',
         initialValue: '',
-        validate(value) {
-            if (value.length === 0)
-                return `Value is required!`;
-        },
-    });
-    const schemaDescPrompt = () => p.text({
-        message: pc.green('schema description'),
-        placeholder: 'meaningful description of command schema',
-        initialValue: 'properties: ',
         validate(value) {
             if (value.length === 0)
                 return `Value is required!`;
@@ -63,7 +54,6 @@ export async function main() {
     const group = await p.group({
         name: namePrompt,
         desc: descPrompt,
-        schema: schemaDescPrompt,
         command: commandPrompt
     }, {
         // On Cancel callback that wraps the group
@@ -73,58 +63,13 @@ export async function main() {
             process.exit(0);
         },
     });
-    // console.debug(group.name, group.desc );
-    let schemaGenerator;
-    spinner.start(pc.magenta('generating schema'));
-    try {
-        schemaGenerator = generateZodSchema( /* verbose true */);
-    }
-    catch (e) {
-        console.error('cannot create schema generator', e);
-        process.exit(-1);
-    }
-    let schemaCode = null;
-    try {
-        schemaCode = await schemaGenerator.create(group.schema);
-    }
-    catch (e) {
-        p.log.error(e.message);
-        schemaCode = null;
-    }
-    finally {
-        spinner.stop();
-    }
-    let schemaConfirm = false;
-    while (!(schemaConfirm = await askForconfirmSchema(schemaCode))) {
-        const schemaDescUpdatePrompt = await p.text({
-            message: pc.green('schema update'),
-            placeholder: 'describe updates to the schema',
-            initialValue: '',
-            validate(value) {
-                if (value.length === 0)
-                    return `Value is required!`;
-            },
-        });
-        if (p.isCancel(schemaDescUpdatePrompt)) {
-            p.cancel('Operation cancelled.');
-            process.exit(0);
-        }
-        spinner.start(pc.magenta('updating schema'));
-        try {
-            schemaCode = await schemaGenerator.update(schemaDescUpdatePrompt);
-        }
-        catch (e) {
-            p.log.error(e.message);
-            schemaCode = null;
-        }
-        finally {
-            spinner.stop();
-        }
-    }
-    if (p.isCancel(schemaConfirm)) {
-        p.cancel('Operation cancelled.');
-        throw `Operation cancelled.`;
-    }
+    //////////////////////////////////////////////////////////////////////
+    // Schema Generator
+    //////////////////////////////////////////////////////////////////////
+    const schemaCode = await generateSchema();
+    //////////////////////////////////////////////////////////////////////
+    // Tool Generator
+    //////////////////////////////////////////////////////////////////////
     spinner.start(pc.magenta('generating tool class'));
     try {
         const tool = await generateToolClass({
