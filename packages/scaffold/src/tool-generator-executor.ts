@@ -76,7 +76,7 @@ export async function initializeToolAgentExecutor(options: CreateOpenAIFunctions
 
         const agentOutcome = await agentRunnable.invoke(data, config);
 
-        console.debug("runAgent agentOutcome", inspect(agentOutcome,{depth:5}));
+        // console.debug("runAgent agentOutcome", inspect(agentOutcome,{depth:5}));
 
         return {
             agentOutcome,
@@ -86,7 +86,7 @@ export async function initializeToolAgentExecutor(options: CreateOpenAIFunctions
     const saveFileTool = async (data: AgentState, config?: RunnableConfig) => {
         const { agentOutcome } = data;
 
-        console.debug("executeTools agentOutcome", inspect(agentOutcome,{depth:5}));
+        // console.debug("executeTools agentOutcome", inspect(agentOutcome,{depth:5}));
 
         if (agentOutcome && isAgentFinish(agentOutcome)) {
             
@@ -109,13 +109,13 @@ export async function initializeToolAgentExecutor(options: CreateOpenAIFunctions
         channels: agentState
     });
 
-    workflow.addNode("agent", new RunnableLambda({ func: runAgent }));
-    workflow.addNode("save-file", new RunnableLambda({ func: saveFileTool }));
+    workflow.addNode("agent-tool-generator", new RunnableLambda({ func: runAgent }));
+    workflow.addNode("save-tool-file", new RunnableLambda({ func: saveFileTool }));
 
-    workflow.setEntryPoint("agent");
+    workflow.setEntryPoint("agent-tool-generator");
 
-    workflow.addEdge("agent", "save-file");
-    workflow.addEdge("save-file", END);
+    workflow.addEdge("agent-tool-generator", "save-tool-file");
+    workflow.addEdge("save-tool-file", END);
 
     return workflow.compile();
 }

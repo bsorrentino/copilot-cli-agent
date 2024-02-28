@@ -1,3 +1,3 @@
-import { main } from './scaffold.js'
+import { scaffhold } from './scaffold.js'
 
-main().catch( e => console.error(e))
+scaffhold().catch( e => console.error(e))

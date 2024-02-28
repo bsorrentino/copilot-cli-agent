@@ -1,6 +1,6 @@
 import { Tool } from "@langchain/core/tools";
 import { CallbackManagerForToolRun } from "@langchain/core/callbacks/manager";
-import { main } from '@bsorrentino/copilot-cli-scaffold'
+import { scaffhold } from '@bsorrentino/copilot-cli-scaffold'
 
 type Progress = {
     start: (msg?: string) => void;
@@ -19,7 +19,11 @@ export class NewCommandsCommandTool extends Tool {
     protected async _call(arg: any, runManager?: CallbackManagerForToolRun | undefined): Promise<string> {
         
         this.progress.stop()
-        return await main()
-
+        /**
+        * Passes the callback manager's child callbacks to scaffhold.
+        * This allows scaffhold to invoke the callbacks during execution as child of the parent callback manager.
+        */
+        return await scaffhold({ callbacks: runManager?.getChild() })
+        
     }
   }

@@ -3,7 +3,6 @@ import { ToolExecutor } from "@langchain/langgraph/prebuilt";
 import { RunnableLambda } from "@langchain/core/runnables";
 import { END, StateGraph } from "@langchain/langgraph";
 import { RegexParser } from "langchain/output_parsers";
-import { inspect } from "node:util";
 import * as path from 'node:path';
 import * as fs from 'node:fs/promises';
 export async function initializeToolAgentExecutor(options, { name, path: outputPath }) {
@@ -48,14 +47,14 @@ export async function initializeToolAgentExecutor(options, { name, path: outputP
     };
     const runAgent = async (data, config) => {
         const agentOutcome = await agentRunnable.invoke(data, config);
-        console.debug("runAgent agentOutcome", inspect(agentOutcome, { depth: 5 }));
+        // console.debug("runAgent agentOutcome", inspect(agentOutcome,{depth:5}));
         return {
             agentOutcome,
         };
     };
     const saveFileTool = async (data, config) => {
         const { agentOutcome } = data;
-        console.debug("executeTools agentOutcome", inspect(agentOutcome, { depth: 5 }));
+        // console.debug("executeTools agentOutcome", inspect(agentOutcome,{depth:5}));
         if (agentOutcome && isAgentFinish(agentOutcome)) {
             const fileName = path.extname(name) === '' ? name + '.mts' : name;
             const filePath = (path.basename(outputPath) !== fileName) ?
@@ -71,10 +70,10 @@ export async function initializeToolAgentExecutor(options, { name, path: outputP
     const workflow = new StateGraph({
         channels: agentState
     });
-    workflow.addNode("agent", new RunnableLambda({ func: runAgent }));
-    workflow.addNode("save-file", new RunnableLambda({ func: saveFileTool }));
-    workflow.setEntryPoint("agent");
-    workflow.addEdge("agent", "save-file");
-    workflow.addEdge("save-file", END);
+    workflow.addNode("agent-tool-generator", new RunnableLambda({ func: runAgent }));
+    workflow.addNode("save-tool-file", new RunnableLambda({ func: saveFileTool }));
+    workflow.setEntryPoint("agent-tool-generator");
+    workflow.addEdge("agent-tool-generator", "save-tool-file");
+    workflow.addEdge("save-tool-file", END);
     return workflow.compile();
 }

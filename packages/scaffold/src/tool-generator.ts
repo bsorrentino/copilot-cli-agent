@@ -1,3 +1,4 @@
+import type { RunnableConfig } from "@langchain/core/runnables";
 import { ChatOpenAI } from "@langchain/openai";
 import { StructuredTool } from '@langchain/core/tools';
 import { ChatPromptTemplate, MessagesPlaceholder, SystemMessagePromptTemplate } from "@langchain/core/prompts";
@@ -48,7 +49,7 @@ export const generateToolClass = async ( args:{
     schema: string, 
     command:string, 
     path:string
-  }) => {
+  }, config?: RunnableConfig) => {
     
     
     const llm = new ChatOpenAI({
@@ -74,7 +75,7 @@ export const generateToolClass = async ( args:{
     
     const agent = await initializeToolAgentExecutor( { prompt, tools, llm }, args );
       
-    return await agent.invoke( { input: '' });
+    return await agent.invoke( { input: '' }, config);
 
 }
 

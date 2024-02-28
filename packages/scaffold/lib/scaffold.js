@@ -3,7 +3,7 @@ import pc from 'picocolors';
 import * as path from "node:path";
 import { generateToolClass } from "./tool-generator.js";
 import { generateSchema } from './schema-generator.js';
-export async function main() {
+export async function scaffhold(config) {
     const spinner = p.spinner();
     p.intro(pc.yellow(`Let generate new custom command 🎬`));
     const namePrompt = () => p.text({
@@ -66,7 +66,7 @@ export async function main() {
     //////////////////////////////////////////////////////////////////////
     // Schema Generator
     //////////////////////////////////////////////////////////////////////
-    const schemaCode = await generateSchema();
+    const schemaCode = await generateSchema(config);
     //////////////////////////////////////////////////////////////////////
     // Tool Generator
     //////////////////////////////////////////////////////////////////////
@@ -76,7 +76,7 @@ export async function main() {
             ...group,
             schema: schemaCode,
             path: path.join(process.cwd(), '..', 'commands', 'src')
-        });
+        }, config);
     }
     catch (e) {
         console.error('generating tool class error', e);

@@ -1,3 +1,5 @@
+import type { RunnableConfig } from "@langchain/core/runnables";
+
 import * as p from '@clack/prompts';
 import pc from 'picocolors'
 import * as path from "node:path";
@@ -5,7 +7,7 @@ import * as path from "node:path";
 import { generateToolClass } from "./tool-generator.js";
 import { generateSchema } from './schema-generator.js';
 
-export async function main() {
+export async function scaffhold( config?: RunnableConfig) {
 
   const spinner = p.spinner();
 
@@ -84,7 +86,7 @@ export async function main() {
   // Schema Generator
   //////////////////////////////////////////////////////////////////////
   
-  const schemaCode = await generateSchema()
+  const schemaCode = await generateSchema( config )
   
   //////////////////////////////////////////////////////////////////////
   // Tool Generator
@@ -96,7 +98,8 @@ export async function main() {
     const tool  = await generateToolClass( { 
       ...group, 
       schema: schemaCode, 
-      path: path.join(process.cwd(), '..', 'commands', 'src' ) } );
+      path: path.join(process.cwd(), '..', 'commands', 'src' ) 
+    }, config );
   
   }
   catch( e ) {

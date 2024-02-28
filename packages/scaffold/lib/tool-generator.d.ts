@@ -1,4 +1,5 @@
 /// <reference types="node" resolution-mode="require"/>
+import type { RunnableConfig } from "@langchain/core/runnables";
 import * as path from 'node:path';
 export declare const generateToolClass: (args: {
     name: string;
@@ -6,4 +7,4 @@ export declare const generateToolClass: (args: {
     schema: string;
     command: string;
     path: string;
-}) => Promise<any>;
+}, config?: RunnableConfig) => Promise<any>;

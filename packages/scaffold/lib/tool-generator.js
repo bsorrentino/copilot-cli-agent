@@ -29,7 +29,7 @@ class SaveFileTool extends StructuredTool {
         return `file ${fileName} saved`;
     }
 }
-export const generateToolClass = async (args) => {
+export const generateToolClass = async (args, config) => {
     const llm = new ChatOpenAI({
         // modelName: "gpt-4",
         modelName: "gpt-3.5-turbo-0613",
@@ -47,7 +47,7 @@ export const generateToolClass = async (args) => {
     ]);
     const tools = [new SaveFileTool()];
     const agent = await initializeToolAgentExecutor({ prompt, tools, llm }, args);
-    return await agent.invoke({ input: '' });
+    return await agent.invoke({ input: '' }, config);
 };
 if (process.argv[2] === '__TEST__') {
     (async () => {
