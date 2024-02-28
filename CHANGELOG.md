@@ -2,6 +2,29 @@
 
 
 
+## [v1.5.3-alpha.0](https://github.com/bsorrentino/pdf-tools/releases/tag/v1.5.3-alpha.0) (2024-02-28)
+
+
+### Bug Fixes
+
+ -  manage langsmith nested calls ([ad271394a3290cb](https://github.com/bsorrentino/pdf-tools/commit/ad271394a3290cb990b303361b6abef61c97b068))
+     > resolve #6
+
+
+### Documentation
+
+ -  update changelog ([706abfa75f58852](https://github.com/bsorrentino/pdf-tools/commit/706abfa75f588522c1a359c887bc02bd8d14fd6d))
+
+
+### Refactor
+
+ -  move scaffold to langgraph ([8805a98da3ec839](https://github.com/bsorrentino/pdf-tools/commit/8805a98da3ec839e64a4a4e3356d53911f6a1857))
+     > work on #6
+
+
+
+
+
 ## [v1.5.2-alpha.0](https://github.com/bsorrentino/pdf-tools/releases/tag/v1.5.2-alpha.0) (2024-02-26)
 
 ### Features
