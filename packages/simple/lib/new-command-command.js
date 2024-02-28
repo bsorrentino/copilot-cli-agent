@@ -1,5 +1,5 @@
 import { Tool } from "@langchain/core/tools";
-import { main } from '@bsorrentino/copilot-cli-scaffold';
+import { scaffhold } from '@bsorrentino/copilot-cli-scaffold';
 export class NewCommandsCommandTool extends Tool {
     progress;
     name = "new_custom_commands_cmd";
@@ -10,6 +10,7 @@ export class NewCommandsCommandTool extends Tool {
     }
     async _call(arg, runManager) {
         this.progress.stop();
-        return await main();
+        console.debug(runManager?.getChild());
+        return await scaffhold({ callbacks: runManager?.getChild() });
     }
 }

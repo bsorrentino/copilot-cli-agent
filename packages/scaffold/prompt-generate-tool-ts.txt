@@ -1,6 +1,7 @@
   As my typescript assistant 
 
   I need that you create a langchain command tool as a plugin for the copilot-cli-agent application.
+
   To do that you must fill the typescript template below with the variables:
   NAME = {name}
   DESC = {desc}
@@ -12,12 +13,10 @@
   as example :
   ls -la <path> must be translated into "ls -la {{arg.path}}" 
 
-  and finally save generated code into a file named "<NAME>.mts" at "{path}".
-
   
   // beging template
   import {{ z }} from "zod";
-  import {{ CommandTool, expandTilde, runCommand }} from "@bsorrentino/copilot-cli-core";
+  import {{ CommandTool, expandTilde, runCommand }} from "\@bsorrentino/copilot-cli-core";
 
   <SCHEMA>;
 

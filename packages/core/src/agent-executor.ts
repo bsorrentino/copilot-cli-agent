@@ -145,7 +145,5 @@ export async function initializeCLIAgentExecutor(options: Pick<CreateOpenAIFunct
     // This means that after `tools` is called, `agent` node is called next.
     // workflow.addEdge("action", "agent");
 
-    const app = workflow.compile();
-
-    return app
+    return workflow.compile();
 }
